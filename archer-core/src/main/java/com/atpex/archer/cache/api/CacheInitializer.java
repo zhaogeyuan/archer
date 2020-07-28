@@ -1,6 +1,6 @@
 package com.atpex.archer.cache.api;
 
-import com.atpex.archer.Component;
+import com.atpex.archer.roots.Component;
 
 /**
  * Cache operation initialization processor

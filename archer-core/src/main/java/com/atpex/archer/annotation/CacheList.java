@@ -1,7 +1,7 @@
 package com.atpex.archer.annotation;
 
-import com.atpex.archer.components.KeyGenerator;
-import com.atpex.archer.components.ValueSerializer;
+import com.atpex.archer.components.api.KeyGenerator;
+import com.atpex.archer.components.api.ValueSerializer;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -35,7 +35,8 @@ public @interface CacheList {
 
     /**
      * Element cache key
-     * Spring Expression Language (SpEL) expression is supported
+     * <p>
+     * Support Spring Expression Language (SpEL)
      */
     String elementKey();
 

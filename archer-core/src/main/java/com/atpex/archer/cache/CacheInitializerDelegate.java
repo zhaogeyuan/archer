@@ -1,6 +1,6 @@
 package com.atpex.archer.cache;
 
-import com.atpex.archer.Component;
+import com.atpex.archer.roots.Component;
 import com.atpex.archer.cache.api.Cache;
 import com.atpex.archer.cache.api.CacheInitializer;
 import com.atpex.archer.cache.api.CacheShard;

@@ -1,11 +1,11 @@
 package com.atpex.archer.util;
 
 import com.atpex.archer.CacheManager;
-import com.atpex.archer.components.KeyGenerator;
-import com.atpex.archer.components.Serializer;
-import com.atpex.archer.metrics.listener.InternalCacheHitRateListener;
-import com.atpex.archer.operation.impl.CacheOperation;
-import com.atpex.archer.operation.impl.EvictionOperation;
+import com.atpex.archer.components.api.KeyGenerator;
+import com.atpex.archer.components.api.Serializer;
+import com.atpex.archer.stats.listener.InternalCacheHitRateListener;
+import com.atpex.archer.operation.CacheOperation;
+import com.atpex.archer.operation.EvictionOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,5 +1,7 @@
 package com.atpex.archer.cache.api;
 
+import com.atpex.archer.stats.event.api.CacheEventCollector;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
@@ -15,21 +17,21 @@ public interface Cache {
     default void init(CacheShard shard) {
     }
 
-    boolean containsKey(String key, StatsProcessor processor);
+    boolean containsKey(String key, CacheEventCollector collector);
 
-    Entry get(String key, StatsProcessor processor);
+    Entry get(String key, CacheEventCollector collector);
 
-    Map<String, Entry> getAll(Collection<String> keys, StatsProcessor processor);
+    Map<String, Entry> getAll(Collection<String> keys, CacheEventCollector collector);
 
-    void put(String key, Entry value, StatsProcessor processor);
+    void put(String key, Entry value, CacheEventCollector collector);
 
-    void putAll(Map<String, Entry> map, StatsProcessor processor);
+    void putAll(Map<String, Entry> map, CacheEventCollector collector);
 
-    void putIfAbsent(String key, Entry value, StatsProcessor processor);
+    void putIfAbsent(String key, Entry value, CacheEventCollector collector);
 
-    void putAllIfAbsent(Map<String, Entry> map, StatsProcessor processor);
+    void putAllIfAbsent(Map<String, Entry> map, CacheEventCollector collector);
 
-    boolean remove(String key, StatsProcessor processor);
+    boolean remove(String key, CacheEventCollector collector);
 
     default Entry wrap(String key, byte[] value, long ttl) {
         return new DefaultEntry(key, value, ttl);
@@ -84,10 +86,5 @@ public interface Cache {
         public long getTtl() {
             return ttl;
         }
-    }
-
-    interface StatsProcessor {
-
-        void cacheAccessed();
     }
 }

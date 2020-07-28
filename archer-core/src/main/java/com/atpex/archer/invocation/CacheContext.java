@@ -1,7 +1,9 @@
 package com.atpex.archer.invocation;
 
 import com.atpex.archer.CacheManager;
-import com.atpex.archer.processor.AbstractProcessor;
+import com.atpex.archer.processor.api.AbstractProcessor;
+import com.atpex.archer.roots.ListComponent;
+import com.atpex.archer.roots.ObjectComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +50,12 @@ public class CacheContext {
     }
 
     public static void evictList(String key) {
-        AbstractProcessor processor = cacheManager.getProcessor(ListCacheComponent.class);
+        AbstractProcessor processor = cacheManager.getProcessor(ListComponent.class);
         evict(key, processor);
     }
 
     public static void evictObject(String key) {
-        AbstractProcessor processor = cacheManager.getProcessor(ObjectCacheComponent.class);
+        AbstractProcessor processor = cacheManager.getProcessor(ObjectComponent.class);
         evict(key, processor);
     }
 

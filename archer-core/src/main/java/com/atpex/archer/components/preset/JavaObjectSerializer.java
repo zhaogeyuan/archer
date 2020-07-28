@@ -1,6 +1,6 @@
 package com.atpex.archer.components.preset;
 
-import com.atpex.archer.components.ValueSerializer;
+import com.atpex.archer.components.api.ValueSerializer;
 import com.atpex.archer.exception.CacheOperationException;
 
 import java.io.*;

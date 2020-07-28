@@ -1,7 +1,7 @@
 package com.atpex.archer.components.preset;
 
 import com.alibaba.fastjson.JSON;
-import com.atpex.archer.components.ValueSerializer;
+import com.atpex.archer.components.api.ValueSerializer;
 
 import java.lang.reflect.Type;
 

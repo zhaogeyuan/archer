@@ -1,13 +1,15 @@
 package com.atpex.archer.processor.context;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
  * @author atpexgo
  * @since 1.0.0
  */
-public class InvocationContext<CACHE_CONTEXT> {
+public class InvocationContext {
 
     private transient Object target;
 
@@ -16,8 +18,6 @@ public class InvocationContext<CACHE_CONTEXT> {
     private transient Object[] args;
 
     private transient Supplier<?> methodInvoker;
-
-    private CACHE_CONTEXT cacheContext;
 
     public Object getTarget() {
         return target;
@@ -51,12 +51,21 @@ public class InvocationContext<CACHE_CONTEXT> {
         this.methodInvoker = methodInvoker;
     }
 
-    public CACHE_CONTEXT getCacheContext() {
-        return cacheContext;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof InvocationContext)) return false;
+        InvocationContext that = (InvocationContext) o;
+        return Objects.equals(target, that.target) &&
+                Objects.equals(method, that.method) &&
+                Arrays.equals(args, that.args) &&
+                Objects.equals(methodInvoker, that.methodInvoker);
     }
 
-    public void setCacheContext(CACHE_CONTEXT cacheContext) {
-        this.cacheContext = cacheContext;
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(target, method, methodInvoker);
+        result = 31 * result + Arrays.hashCode(args);
+        return result;
     }
-
 }

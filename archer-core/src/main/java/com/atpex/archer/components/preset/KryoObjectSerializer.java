@@ -1,6 +1,6 @@
 package com.atpex.archer.components.preset;
 
-import com.atpex.archer.components.ValueSerializer;
+import com.atpex.archer.components.api.ValueSerializer;
 import com.atpex.archer.util.ReflectionUtil;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;

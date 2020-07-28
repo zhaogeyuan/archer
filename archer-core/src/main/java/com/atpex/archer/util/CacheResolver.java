@@ -1,21 +1,17 @@
 package com.atpex.archer.util;
 
-import com.atpex.archer.annotation.Cache;
-import com.atpex.archer.annotation.CacheList;
-import com.atpex.archer.annotation.CacheMulti;
-import com.atpex.archer.annotation.Cacheable;
+import com.atpex.archer.annotation.*;
+import com.atpex.archer.annotation.extra.MapTo;
 import com.atpex.archer.constants.Constants;
-import com.atpex.archer.metadata.AbstractCacheMetadata;
-import com.himalaya.service.cacheable.annotation.*;
-import com.himalaya.service.cacheable.annotation.extra.MapTo;
-import com.himalaya.service.cacheable.cache.metadata.impl.CacheEvictionMetadata;
-import com.himalaya.service.cacheable.cache.metadata.impl.ListableCacheMetadata;
-import com.himalaya.service.cacheable.cache.metadata.impl.ObjectCacheMetadata;
-import com.himalaya.service.cacheable.context.CacheInvocationContext;
-import com.himalaya.service.cacheable.exceptions.CacheBeanParsingException;
-import com.himalaya.service.cacheable.exceptions.CacheOperationException;
-import com.himalaya.service.cacheable.loader.MultipleLoader;
-import com.himalaya.service.cacheable.loader.SingleLoader;
+import com.atpex.archer.exception.CacheBeanParsingException;
+import com.atpex.archer.exception.CacheOperationException;
+import com.atpex.archer.loader.MultipleLoader;
+import com.atpex.archer.loader.SingleLoader;
+import com.atpex.archer.metadata.EvictionMetadata;
+import com.atpex.archer.metadata.ListCacheMetadata;
+import com.atpex.archer.metadata.ObjectCacheMetadata;
+import com.atpex.archer.metadata.api.AbstractCacheMetadata;
+import com.atpex.archer.processor.context.InvocationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -46,24 +42,22 @@ public class CacheResolver {
     }
 
     public static AbstractCacheMetadata resolveMetadata(Cacheable serviceCacheable, Method method, Annotation annotation) {
-        String cacheArea = Constants.DEFAULT_CACHE_AREA;
         String keyPrefix = "";
         String valueSerializer = "";
         String keyGenerator = "";
         if (serviceCacheable != null) {
-            cacheArea = serviceCacheable.cacheArea();
             keyPrefix = CommonUtils.isNotEmpty(serviceCacheable.prefix()) ? serviceCacheable.prefix() : serviceCacheable.value();
             valueSerializer = serviceCacheable.valueSerializer();
             keyGenerator = serviceCacheable.keyGenerator();
         }
         if (annotation instanceof Cache || annotation instanceof CacheMulti) {
-            return resolveObjectCacheMetadata(method, annotation, cacheArea, keyPrefix, keyGenerator, valueSerializer, annotation);
+            return resolveObjectCacheMetadata(method, annotation, keyPrefix, keyGenerator, valueSerializer, annotation);
         } else if (annotation instanceof CacheList) {
-            ListCacheable listCacheable = (ListCacheable) annotation;
-            return resolveListableCacheMetadata(method, annotation, cacheArea, keyPrefix, keyGenerator, valueSerializer, listCacheable);
-        } else if (annotation instanceof CacheEvict) {
-            CacheEvict cacheEvict = (CacheEvict) annotation;
-            return resolveCacheEvictMetadata(method, annotation, cacheArea, keyPrefix, keyGenerator, cacheEvict);
+            CacheList cacheList = (CacheList) annotation;
+            return resolveListableCacheMetadata(method, annotation, keyPrefix, keyGenerator, valueSerializer, cacheList);
+        } else if (annotation instanceof Evict) {
+            Evict evict = (Evict) annotation;
+            return resolveCacheEvictMetadata(method, annotation, keyPrefix, keyGenerator, evict);
         } else {
             throw new CacheBeanParsingException("Unsupported cache annotation : " + annotation);
         }
@@ -72,48 +66,45 @@ public class CacheResolver {
 
     private
     static ObjectCacheMetadata
-    resolveObjectCacheMetadata(Method method, Annotation cacheAnnotation, String cacheArea, String keyPrefix, String keyGenerator, String valueSerializer, Annotation annotation) {
+    resolveObjectCacheMetadata(Method method, Annotation cacheAnnotation, String keyPrefix, String keyGenerator, String valueSerializer, Annotation annotation) {
         ObjectCacheMetadata metadata = new ObjectCacheMetadata();
 
-        String key, condition, area, aKeyGenerator, aValueSerializer;
-        boolean overwrite, penetrationProtect;
-        long expiration, penetrationProtectTimeout;
-        TimeUnit expirationTimeUnit, penetrationProtectTimeoutTimeUnit;
-        if (annotation instanceof Cacheable) {
-            Cacheable cacheable = (Cacheable) annotation;
-            key = cacheable.key();
-            condition = cacheable.condition();
-            area = cacheable.cacheArea();
-            aKeyGenerator = cacheable.keyGenerator();
-            aValueSerializer = cacheable.valueSerializer();
-            overwrite = cacheable.overwrite();
-            penetrationProtect = cacheable.penetrationProtect();
-            expiration = cacheable.expiration();
-            penetrationProtectTimeout = cacheable.penetrationProtectTimeout();
-            expirationTimeUnit = cacheable.expirationTimeUnit();
-            penetrationProtectTimeoutTimeUnit = cacheable.penetrationProtectTimeoutTimeUnit();
+        String key, condition, aKeyGenerator, aValueSerializer;
+        boolean overwrite, breakdownProtect;
+        long expiration, breakdownProtectTimeout;
+        TimeUnit expirationTimeUnit, breakdownProtectTimeoutTimeUnit;
+        if (annotation instanceof Cache) {
+            Cache cache = (Cache) annotation;
+            key = cache.key();
+            condition = cache.condition();
+            aKeyGenerator = cache.keyGenerator();
+            aValueSerializer = cache.valueSerializer();
+            overwrite = cache.overwrite();
+            breakdownProtect = cache.breakdownProtect();
+            expiration = cache.expiration();
+            breakdownProtectTimeout = cache.breakdownProtectTimeout();
+            expirationTimeUnit = cache.expirationTimeUnit();
+            breakdownProtectTimeoutTimeUnit = cache.breakdownProtectTimeUnit();
         } else {
-            MultipleCacheable cacheable = (MultipleCacheable) annotation;
-            key = cacheable.elementKey();
-            condition = cacheable.condition();
-            area = cacheable.cacheArea();
-            aKeyGenerator = cacheable.keyGenerator();
-            aValueSerializer = cacheable.valueSerializer();
-            overwrite = cacheable.overwrite();
-            penetrationProtect = cacheable.penetrationProtect();
-            expiration = cacheable.expiration();
-            penetrationProtectTimeout = cacheable.penetrationProtectTimeout();
-            expirationTimeUnit = cacheable.expirationTimeUnit();
-            penetrationProtectTimeoutTimeUnit = cacheable.penetrationProtectTimeoutTimeUnit();
+            CacheMulti cacheMulti = (CacheMulti) annotation;
+            key = cacheMulti.elementKey();
+            condition = cacheMulti.condition();
+            aKeyGenerator = cacheMulti.keyGenerator();
+            aValueSerializer = cacheMulti.valueSerializer();
+            overwrite = cacheMulti.overwrite();
+            breakdownProtect = cacheMulti.breakdownProtect();
+            expiration = cacheMulti.expiration();
+            breakdownProtectTimeout = cacheMulti.breakdownProtectTimeout();
+            expirationTimeUnit = cacheMulti.expirationTimeUnit();
+            breakdownProtectTimeoutTimeUnit = cacheMulti.breakdownProtectTimeUnit();
 
-            metadata.setOrderBy(cacheable.orderBy());
+            metadata.setOrderBy(cacheMulti.orderBy());
             metadata.setMultiple(true);
         }
         resolveCommonMetadata(
                 metadata,
                 method,
                 cacheAnnotation,
-                resolveValue(cacheArea, area),
                 keyPrefix,
                 key,
                 condition,
@@ -122,59 +113,56 @@ public class CacheResolver {
 
         metadata.setInvokeAnyway(overwrite);
         metadata.setExpirationInMillis(expirationTimeUnit.toMillis(expiration));
-        metadata.setPenetrationProtect(penetrationProtect);
-        metadata.setPenetrationProtectTimeoutInMillis(penetrationProtectTimeoutTimeUnit.toMillis(penetrationProtectTimeout));
+        metadata.setBreakdownProtect(breakdownProtect);
+        metadata.setBreakdownProtectTimeoutInMillis(breakdownProtectTimeoutTimeUnit.toMillis(breakdownProtectTimeout));
         metadata.setValueSerializer(resolveValue(valueSerializer, aValueSerializer));
         return metadata;
     }
 
     private
-    static ListableCacheMetadata
-    resolveListableCacheMetadata(Method method, Annotation cacheAnnotation, String cacheArea, String keyPrefix, String keyGenerator, String valueSerializer, ListCacheable listCacheable) {
-        ListableCacheMetadata metadata = new ListableCacheMetadata();
+    static ListCacheMetadata
+    resolveListableCacheMetadata(Method method, Annotation cacheAnnotation, String keyPrefix, String keyGenerator, String valueSerializer, CacheList cacheList) {
+        ListCacheMetadata metadata = new ListCacheMetadata();
         resolveCommonMetadata(
                 metadata,
                 method,
                 cacheAnnotation,
-                resolveValue(cacheArea, listCacheable.cacheArea()),
                 keyPrefix,
-                listCacheable.key(),
-                listCacheable.condition(),
-                resolveValue(keyGenerator, listCacheable.keyGenerator())
+                cacheList.key(),
+                cacheList.condition(),
+                resolveValue(keyGenerator, cacheList.keyGenerator())
         );
-        metadata.setElementKey(listCacheable.elementKey());
-        metadata.setElementKeyGenerator(listCacheable.elementKeyGenerator());
-        metadata.setInvokeAnyway(listCacheable.overwrite());
-        metadata.setElementValueSerializer(resolveValue(valueSerializer, listCacheable.elementValueSerializer()));
-        metadata.setExpirationInMillis(listCacheable.expirationTimeUnit().toMillis(listCacheable.expiration()));
-        metadata.setPenetrationProtect(listCacheable.penetrationProtect());
-        metadata.setPenetrationProtectTimeoutInMillis(listCacheable.penetrationProtectTimeoutTimeUnit().toMillis(listCacheable.penetrationProtectTimeout()));
+        metadata.setElementKey(cacheList.elementKey());
+        metadata.setElementKeyGenerator(cacheList.elementKeyGenerator());
+        metadata.setInvokeAnyway(cacheList.overwrite());
+        metadata.setElementValueSerializer(resolveValue(valueSerializer, cacheList.elementValueSerializer()));
+        metadata.setExpirationInMillis(cacheList.expirationTimeUnit().toMillis(cacheList.expiration()));
+        metadata.setBreakdownProtect(cacheList.breakdownProtect());
+        metadata.setBreakdownProtectTimeoutInMillis(cacheList.breakdownProtectTimeUnit().toMillis(cacheList.breakdownProtectTimeout()));
         return metadata;
     }
 
     private
-    static CacheEvictionMetadata
-    resolveCacheEvictMetadata(Method method, Annotation cacheAnnotation, String cacheArea, String keyPrefix, String keyGenerator, CacheEvict cacheEvict) {
-        CacheEvictionMetadata metadata = new CacheEvictionMetadata();
+    static EvictionMetadata
+    resolveCacheEvictMetadata(Method method, Annotation cacheAnnotation, String keyPrefix, String keyGenerator, Evict evict) {
+        EvictionMetadata metadata = new EvictionMetadata();
         resolveCommonMetadata(
                 metadata,
                 method,
                 cacheAnnotation,
-                resolveValue(cacheArea, cacheEvict.cacheArea()),
                 keyPrefix,
-                cacheEvict.key(),
-                cacheEvict.condition(),
-                resolveValue(keyGenerator, cacheEvict.keyGenerator())
+                evict.key(),
+                evict.condition(),
+                resolveValue(keyGenerator, evict.keyGenerator())
         );
-        metadata.setAfterInvocation(cacheEvict.afterInvocation());
+        metadata.setAfterInvocation(evict.afterInvocation());
         return metadata;
     }
 
     private
     static void
-    resolveCommonMetadata(AbstractCacheMetadata metadata, Method method, Annotation cacheAnnotation, String area, String keyPrefix, String key, String condition, String keyGenerator) {
+    resolveCommonMetadata(AbstractCacheMetadata metadata, Method method, Annotation cacheAnnotation, String keyPrefix, String key, String condition, String keyGenerator) {
         metadata.setCacheAnnotation(cacheAnnotation);
-        metadata.setArea(area);
         metadata.setKeyPrefix(keyPrefix);
         metadata.setKey(key);
         metadata.setCondition(condition);
@@ -196,7 +184,7 @@ public class CacheResolver {
 
     public static SingleLoader<?> createListableCacheLoader() {
         InvocationHandler invocationHandler = (proxy, method1, args) -> {
-            Object o = ((CacheInvocationContext) args[0]).getMethodInvoker().get();
+            Object o = ((InvocationContext) args[0]).getMethodInvoker().get();
             if (o == null) {
                 return null;
             }
@@ -208,11 +196,11 @@ public class CacheResolver {
 
     public static SingleLoader<?> createObjectCacheSingleLoader(final Method method) {
         InvocationHandler invocationHandler = (proxy, method1, args) -> {
-            if (((CacheInvocationContext) args[0]).getMethodInvoker() == null) {
+            if (((InvocationContext) args[0]).getMethodInvoker() == null) {
                 method.setAccessible(true);
-                return method.invoke(((CacheInvocationContext) args[0]).getTarget(), ((CacheInvocationContext) args[0]).getArgs());
+                return method.invoke(((InvocationContext) args[0]).getTarget(), ((InvocationContext) args[0]).getArgs());
             }
-            return ((CacheInvocationContext) args[0]).getMethodInvoker().get();
+            return ((InvocationContext) args[0]).getMethodInvoker().get();
         };
         Object object = Proxy.newProxyInstance(SingleLoader.class.getClassLoader(), new Class[]{SingleLoader.class}, invocationHandler);
         return (SingleLoader<?>) object;
@@ -221,13 +209,13 @@ public class CacheResolver {
     @SuppressWarnings("rawtypes")
     public static MultipleLoader<?> createObjectCacheMultiLoader(final Method method) {
         InvocationHandler invocationHandler = (proxy, method1, args) -> {
-            List<CacheInvocationContext> contexts = (List<CacheInvocationContext>) args[0];
+            List<InvocationContext> contexts = (List<InvocationContext>) args[0];
             // should not be null!!
             Object target = contexts.get(0).getTarget();
 
             // the arguments here for example may be [(1,"s"),(2,"s")]
             List<Object[]> flattenedArgs = new ArrayList<>();
-            for (CacheInvocationContext context : contexts) {
+            for (InvocationContext context : contexts) {
                 flattenedArgs.add(context.getArgs());
             }
 
@@ -239,19 +227,19 @@ public class CacheResolver {
             // check if result size is the same with argument size
             List resultList = (List) ReflectionUtil.transToList(result);
 
-            Map<CacheInvocationContext, Object> map = new HashMap<>();
+            Map<InvocationContext, Object> map = new HashMap<>();
             if (CollectionUtils.isEmpty(resultList)) {
                 return map;
             }
 
             // check if @MapTo is declared and then resolve it
-            Map<Integer, Annotation> indexedMapTo = ReflectionUtil.getIndexedMethodParameterCacheableAnnotations(method);
+            Map<Integer, Annotation> indexedMapTo = ReflectionUtil.getIndexedMethodParameterCacheAnnotations(method);
             if (CommonUtils.isEmpty(indexedMapTo)) {
                 throw new CacheOperationException("The parameter of method declaring @MultipleCacheable should declare @MapTo.");
             }
 
             // gather all arguments declaring @MapTo to MappedArguments, and map it to context
-            Map<MappedArguments, CacheInvocationContext> contextMap = new HashMap<>();
+            Map<MappedArguments, InvocationContext> contextMap = new HashMap<>();
             List<Map.Entry<Integer, Annotation>> indexedMapToEntries = new ArrayList<>(indexedMapTo.entrySet());
             for (int i = 0; i < flattenedArgs.size(); i++) {
                 Object[] flattenedArg = flattenedArgs.get(i);

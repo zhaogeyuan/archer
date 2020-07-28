@@ -1,7 +1,7 @@
 package com.atpex.archer.annotation;
 
-import com.atpex.archer.components.KeyGenerator;
-import com.atpex.archer.components.ValueSerializer;
+import com.atpex.archer.components.api.KeyGenerator;
+import com.atpex.archer.components.api.ValueSerializer;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -25,11 +25,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface CacheMulti {
 
     /**
-     * Cache key
+     * Element cache key
      * <p>
      * Support Spring Expression Language (SpEL)
      */
-    String key();
+    String elementKey();
 
     /**
      * Expiration

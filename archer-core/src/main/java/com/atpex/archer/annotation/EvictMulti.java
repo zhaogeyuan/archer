@@ -1,6 +1,6 @@
 package com.atpex.archer.annotation;
 
-import com.atpex.archer.components.KeyGenerator;
+import com.atpex.archer.components.api.KeyGenerator;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Repeatable;

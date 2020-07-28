@@ -8,8 +8,6 @@ package com.atpex.archer.constants;
  */
 public class Constants {
 
-    public static final String DEFAULT_CACHE_AREA = "default_area";
-
     public static final String DEFAULT_DELIMITER = ":";
 
     public static final String OBJECT_LOAD_METHOD_ARGS_CACHE_PREFIX = "$args$" + DEFAULT_DELIMITER;

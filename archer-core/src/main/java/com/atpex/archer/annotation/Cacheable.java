@@ -1,7 +1,7 @@
 package com.atpex.archer.annotation;
 
-import com.atpex.archer.components.KeyGenerator;
-import com.atpex.archer.components.ValueSerializer;
+import com.atpex.archer.components.api.KeyGenerator;
+import com.atpex.archer.components.api.ValueSerializer;
 
 import java.lang.annotation.*;
 
@@ -22,11 +22,6 @@ public @interface Cacheable {
      * Alias for {@link #prefix()}
      */
     String value() default "";
-
-    /**
-     * Cache area
-     */
-    String cacheArea() default "";
 
     /**
      * Cache key prefix

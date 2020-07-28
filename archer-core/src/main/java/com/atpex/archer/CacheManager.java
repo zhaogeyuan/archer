@@ -1,17 +1,22 @@
 package com.atpex.archer;
 
 import com.atpex.archer.cache.internal.ShardingCache;
-import com.atpex.archer.components.KeyGenerator;
-import com.atpex.archer.components.Serializer;
+import com.atpex.archer.components.api.KeyGenerator;
+import com.atpex.archer.components.api.Serializer;
 import com.atpex.archer.constants.Serialization;
 import com.atpex.archer.exception.CacheOperationException;
 import com.atpex.archer.expression.CacheExpressionUtilObject;
-import com.atpex.archer.metadata.impl.CacheMetadata;
-import com.atpex.archer.metrics.event.CacheEvent;
-import com.atpex.archer.metrics.observer.CacheMetricsObserver;
-import com.atpex.archer.operation.impl.CacheOperation;
-import com.atpex.archer.operation.impl.EvictionOperation;
-import com.atpex.archer.processor.AbstractProcessor;
+import com.atpex.archer.metadata.CacheMetadata;
+import com.atpex.archer.stats.event.api.CacheEvent;
+import com.atpex.archer.stats.observer.CacheMetricsObserver;
+import com.atpex.archer.operation.CacheOperation;
+import com.atpex.archer.operation.EvictionOperation;
+import com.atpex.archer.processor.api.AbstractProcessor;
+import com.atpex.archer.processor.ListProcessor;
+import com.atpex.archer.processor.ObjectProcessor;
+import com.atpex.archer.roots.Component;
+import com.atpex.archer.roots.ListComponent;
+import com.atpex.archer.roots.ObjectComponent;
 import com.atpex.archer.util.CommonUtils;
 import com.atpex.archer.util.SpringElUtil;
 
@@ -30,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings("all")
 public class CacheManager implements Component {
 
-    public static final String INTERNAL_CACHE_MANAGEMENT_BEAN_NAME = "service.cacheable.internalCacheManagement";
+    public static final String INTERNAL_CACHE_MANAGER_BEAN_NAME = "archar.cache.internalCacheManager";
 
     /**
      * cache config properties
@@ -229,15 +234,13 @@ public class CacheManager implements Component {
         vars.put("util", CacheExpressionUtilObject.class);
         SpringElUtil.init(vars);
 
-        ListServiceCacheProcessor<?> listServiceCacheProcessor = new ListServiceCacheProcessor<>();
-        listServiceCacheProcessor.setCacheManagement(this);
-        listServiceCacheProcessor.afterCacheManagementSet();
-        processors.put(ListCacheComponent.class.toString(), listServiceCacheProcessor);
+        ListProcessor<?> listServiceCacheProcessor = new ListProcessor<>();
+        listServiceCacheProcessor.afterInitialized(this);
+        processors.put(ListComponent.class.toString(), listServiceCacheProcessor);
 
-        ObjectServiceCacheProcessor<?> objectServiceCacheProcessor = new ObjectServiceCacheProcessor<>();
-        objectServiceCacheProcessor.setCacheManagement(this);
-        objectServiceCacheProcessor.afterCacheManagementSet();
-        processors.put(ObjectCacheComponent.class.toString(), objectServiceCacheProcessor);
+        ObjectProcessor<?> objectServiceCacheProcessor = new ObjectProcessor<>();
+        objectServiceCacheProcessor.afterInitialized(this);
+        processors.put(ObjectComponent.class.toString(), objectServiceCacheProcessor);
     }
 
     @Override

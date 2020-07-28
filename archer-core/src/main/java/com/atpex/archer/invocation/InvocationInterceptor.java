@@ -3,32 +3,26 @@ package com.atpex.archer.invocation;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
-import com.himalaya.service.cacheable.cache.management.CacheManagement;
-import com.himalaya.service.cacheable.cache.metadata.AbstractCacheAcceptationMetadata;
-import com.himalaya.service.cacheable.cache.metadata.AbstractCacheMetadata;
-import com.himalaya.service.cacheable.cache.metadata.impl.CacheEvictionMetadata;
-import com.himalaya.service.cacheable.cache.metadata.impl.ObjectCacheMetadata;
-import com.himalaya.service.cacheable.cache.processor.AbstractServiceCacheProcessor;
-import com.himalaya.service.cacheable.cache.processor.ListableServiceCacheProcessor;
-import com.himalaya.service.cacheable.cache.source.AbstractAcceptationOperationSource;
-import com.himalaya.service.cacheable.cache.source.AbstractListableOperationSource;
-import com.himalaya.service.cacheable.cache.source.impl.EvictionOperationSource;
-import com.himalaya.service.cacheable.context.CacheInvocationContext;
-import com.himalaya.service.cacheable.context.CacheInvocationContexts;
-import com.himalaya.service.cacheable.exceptions.FallbackException;
-import com.himalaya.service.cacheable.metrics.event.CacheHitRateEvent;
-import com.himalaya.service.cacheable.metrics.event.CacheInvokedEvent;
-import com.himalaya.service.cacheable.metrics.observer.CacheMetricsObserver;
-import com.himalaya.service.cacheable.util.CommonUtils;
-import com.himalaya.service.cacheable.util.ReflectionUtil;
-import com.himalaya.service.cacheable.util.SpringElUtil;
+import com.atpex.archer.CacheManager;
+import com.atpex.archer.exception.FallbackException;
+import com.atpex.archer.metadata.EvictionMetadata;
+import com.atpex.archer.metadata.ObjectCacheMetadata;
+import com.atpex.archer.metadata.api.AbstractCacheMetadata;
+import com.atpex.archer.operation.CacheOperation;
+import com.atpex.archer.operation.EvictionOperation;
+import com.atpex.archer.operation.ListCacheOperation;
+import com.atpex.archer.processor.ListProcessor;
+import com.atpex.archer.processor.api.AbstractProcessor;
+import com.atpex.archer.processor.context.InvocationContext;
+import com.atpex.archer.util.CommonUtils;
+import com.atpex.archer.util.ReflectionUtil;
+import com.atpex.archer.util.SpringElUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -42,19 +36,16 @@ public class InvocationInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(InvocationInterceptor.class);
 
-    private CacheManagement management;
-
-    private CacheMetricsObserver<CacheInvokedEvent> metricsObserver;
+    private CacheManager manager;
 
     public static final InvocationInterceptor INSTANCE = new InvocationInterceptor();
 
     InvocationInterceptor() {
     }
 
-    public static void init(CacheManagement management, CacheMetricsObserver<CacheInvokedEvent> metricsObserver) {
-        CacheContext.setCacheManager(management);
-        INSTANCE.management = management;
-        INSTANCE.metricsObserver = metricsObserver;
+    public static void init(CacheManager manager) {
+        CacheContext.setCacheManager(manager);
+        INSTANCE.manager = manager;
     }
 
     public Object invoke(Object proxy, Object target, Supplier<?> methodInvoker, Method method, Object[] args) throws Throwable {
@@ -65,7 +56,7 @@ public class InvocationInterceptor {
         // get the actual method of target object invoked
         method = target.getClass().getMethod(method.getName(), method.getParameterTypes());
 
-        if (!ReflectionUtil.findAnyCacheableAnnotation(method)) {
+        if (!ReflectionUtil.findAnyCacheAnnotation(method)) {
             return methodInvoker.get();
         }
 
@@ -73,57 +64,53 @@ public class InvocationInterceptor {
         // cache management
 
         // cache acceptation operation sources
-        List<AbstractAcceptationOperationSource> acceptationOperationSources = management.getAcceptationOperationSources(methodSignature, AbstractAcceptationOperationSource.class);
+        List<CacheOperation> cacheOperations = manager.getCacheOperations(methodSignature, CacheOperation.class);
 
         // cache eviction operation sources
-        List<EvictionOperationSource> evictionOperationSources = management.getEvictionOperationSources(methodSignature);
+        List<EvictionOperation> evictionOperations = manager.getEvictionOperations(methodSignature);
 
         // merge cache context
         AcceptationContext acceptationContext = new AcceptationContext();
-        for (AbstractAcceptationOperationSource cacheAcceptationOperationSource : acceptationOperationSources) {
+        for (CacheOperation cacheOperation : cacheOperations) {
             // cache config metadata
-            AbstractCacheMetadata metadata = cacheAcceptationOperationSource.getMetadata();
+            AbstractCacheMetadata metadata = cacheOperation.getMetadata();
 
             // service cache
-            AbstractServiceCacheProcessor serviceCache = management.getServiceCache(cacheAcceptationOperationSource);
+            AbstractProcessor processor = manager.getProcessor(cacheOperation);
 
             if (conditionPass(metadata.getCondition(), target, method, args)) {
                 logger.debug("Condition check passed, enter service cache procedure");
 
                 acceptationContext.merge(
                         metadata instanceof ObjectCacheMetadata && ((ObjectCacheMetadata) metadata).isMultiple() ?
-                                multiCacheProcessor(serviceCache, cacheAcceptationOperationSource, target, method, args, methodInvoker) :
-                                cacheProcessor(serviceCache, cacheAcceptationOperationSource, target, method, args, methodInvoker)
+                                multiCacheProcessor(processor, cacheOperation, target, method, args, methodInvoker) :
+                                cacheProcessor(processor, cacheOperation, target, method, args, methodInvoker)
                 );
             }
         }
 
         // merge eviction context
         EvictionContext evictionContext = new EvictionContext();
-        for (EvictionOperationSource evictionOperationSource : evictionOperationSources) {
+        for (EvictionOperation evictionOperation : evictionOperations) {
             evictionContext.merge(
-                    evictionProcessor(management, management.getAcceptationOperationSourceMap().values(), evictionOperationSource, target, method, args)
+                    evictionProcessor(manager, manager.getCacheOperationMap().values(), evictionOperation, target, method, args)
             );
         }
 
         // init invoked event & get observer
-        CacheInvokedEvent cacheInvokedEvent = new CacheInvokedEvent();
         // proceed
 
         // proceed eviction pre-operations
         for (Supplier<?> preOperation : evictionContext.preOperations) {
-            cacheInvokedEvent.setInvoked(true);
             preOperation.get();
         }
 
-        Object result = acceptationContext.proceed((none) -> cacheInvokedEvent.setInvoked(true), methodInvoker);
+        Object result = acceptationContext.proceed(methodInvoker);
 
         // proceed eviction post-operations
         for (Supplier<?> postOperation : evictionContext.postOperations) {
-            cacheInvokedEvent.setInvoked(true);
             postOperation.get();
         }
-        metricsObserver.observe(cacheInvokedEvent);
         return result;
     }
 
@@ -147,7 +134,7 @@ public class InvocationInterceptor {
      * Create cache context which contains intercepted cache operations
      *
      * @param cacheProcessor
-     * @param operationSource
+     * @param cacheOperation
      * @param target
      * @param method
      * @param args
@@ -155,35 +142,30 @@ public class InvocationInterceptor {
      * @return
      * @throws Throwable
      */
-    private AcceptationContext multiCacheProcessor(AbstractServiceCacheProcessor cacheProcessor,
-                                                   AbstractAcceptationOperationSource operationSource,
+    private AcceptationContext multiCacheProcessor(AbstractProcessor cacheProcessor,
+                                                   CacheOperation cacheOperation,
                                                    Object target, Method method, Object[] args, Supplier<?> methodInvoker) throws Throwable {
         AcceptationContext acceptationContext = new AcceptationContext();
 
-        List<CacheInvocationContext> contexts = new ArrayList<>();
+        List<InvocationContext> contexts = new ArrayList<>();
 
         List<Object[]> newArgs = ReflectionUtil.flattenArgs(args);
 
         for (Object[] newArg : newArgs) {
-            CacheInvocationContext context = CacheInvocationContext.builder()
-                    .method(method)
-                    .args(newArg)
-                    .target(target)
-                    .methodInvoker(methodInvoker)
-                    .build();
+            InvocationContext context = new InvocationContext();
+            context.setTarget(target);
+            context.setMethod(method);
+            context.setArgs(newArg);
+            context.setMethodInvoker(methodInvoker);
             contexts.add(context);
         }
 
-        CacheInvocationContexts cacheInvocationContexts = new CacheInvocationContexts();
-        cacheInvocationContexts.setCacheInvocationContextList(contexts);
-        cacheInvocationContexts.setEventBuilder(CacheHitRateEvent.eventBuilder(operationSource.getCacheType()).setTotalDataSize(contexts.size()));
-
         push(acceptationContext.operations, () -> {
             try {
-                Map all = cacheProcessor.getAll(cacheInvocationContexts, operationSource);
+                Map all = cacheProcessor.getAll(contexts, cacheOperation);
                 Object[] values = all.values().toArray();
                 if (all instanceof LinkedHashMap) {
-                    Object[] keys = all.keySet().toArray(new CacheInvocationContext[0]);
+                    Object[] keys = all.keySet().toArray(new InvocationContext[0]);
                     values = new Object[keys.length];
                     for (int i = 0; i < keys.length; i++) {
                         values[i] = all.get(keys[i]);
@@ -194,7 +176,6 @@ public class InvocationInterceptor {
             } catch (FallbackException fallbackException) {
                 return methodInvoker.get();
             } finally {
-                cacheProcessor.getCacheManagement().getCacheObserver().observe(cacheInvocationContexts.getEventBuilder().build());
             }
         }, false);
         return acceptationContext;
@@ -212,23 +193,20 @@ public class InvocationInterceptor {
      * @return
      * @throws Throwable
      */
-    private AcceptationContext cacheProcessor(AbstractServiceCacheProcessor cacheProcessor,
-                                              AbstractAcceptationOperationSource operationSource,
+    private AcceptationContext cacheProcessor(AbstractProcessor cacheProcessor,
+                                              CacheOperation cacheOperation,
                                               Object target, Method method, Object[] args, Supplier<?> methodInvoker) throws Throwable {
         AcceptationContext acceptationContext = new AcceptationContext();
-        CacheInvocationContext context =
-                CacheInvocationContext.builder()
-                        .method(method)
-                        .args(args)
-                        .target(target)
-                        .methodInvoker(methodInvoker)
-                        .build();
-        context.setEventBuilder(CacheHitRateEvent.eventBuilder(operationSource.getCacheType()).setTotalDataSize(1));
+        InvocationContext context = new InvocationContext();
+        context.setTarget(target);
+        context.setMethod(method);
+        context.setArgs(args);
+        context.setMethodInvoker(methodInvoker);
 
         push(acceptationContext.operations, () -> {
             try {
-                Object result = cacheProcessor.get(context, operationSource);
-                if (result != null && cacheProcessor instanceof ListableServiceCacheProcessor) {
+                Object result = cacheProcessor.get(context, cacheOperation);
+                if (result != null && cacheProcessor instanceof ListProcessor) {
                     // fix real type if is collection or array
                     Type componentOrArgumentType = ReflectionUtil.getComponentOrArgumentType(method);
                     if (componentOrArgumentType != null) {
@@ -240,7 +218,6 @@ public class InvocationInterceptor {
             } catch (FallbackException fallbackException) {
                 return methodInvoker.get();
             } finally {
-                cacheProcessor.getCacheManagement().getCacheObserver().observe(context.getEventBuilder().build());
             }
         }, false);
         return acceptationContext;
@@ -250,45 +227,38 @@ public class InvocationInterceptor {
      * Create eviction context which contains intercepted eviction operations
      *
      * @param management
-     * @param cacheAcceptationOperationSources
-     * @param evictionOperationSource
+     * @param cacheOperations
+     * @param evictionOperation
      * @param target
      * @param method
      * @param args
      * @return
      * @throws Throwable
      */
-    private EvictionContext evictionProcessor(CacheManagement management,
-                                              Collection<AbstractAcceptationOperationSource> cacheAcceptationOperationSources,
-                                              EvictionOperationSource evictionOperationSource,
+    private EvictionContext evictionProcessor(CacheManager management,
+                                              Collection<CacheOperation> cacheOperations,
+                                              EvictionOperation evictionOperation,
                                               Object target, Method method, Object[] args) throws Throwable {
 
         EvictionContext evictionContext = new EvictionContext();
-        CacheEvictionMetadata metadata = evictionOperationSource.getMetadata();
+        EvictionMetadata metadata = evictionOperation.getMetadata();
         List<Supplier<?>> operations = metadata.getAfterInvocation() ? evictionContext.postOperations : evictionContext.preOperations;
-        for (AbstractAcceptationOperationSource cacheAcceptationOperationSource : cacheAcceptationOperationSources) {
-            AbstractServiceCacheProcessor<Object, AbstractAcceptationOperationSource<AbstractCacheAcceptationMetadata, Object>> serviceCache = management.getServiceCache(cacheAcceptationOperationSource);
-            if (Objects.equals(cacheAcceptationOperationSource.getMetadata().getArea(), metadata.getArea())) {
-
-                CacheInvocationContext context = CacheInvocationContext.builder()
-                        .target(target)
-                        .method(method)
-                        .args(args)
-                        .build();
-                context.setEventBuilder(CacheHitRateEvent.eventBuilder(evictionOperationSource.getCacheType()).setTotalDataSize(1));
-                // always delete listable cache first, because complex cache dose not just delete key, also need cache key to find some other records
-                push(operations, () -> {
-                    try {
-                        logger.debug("Delete context: {}", context);
-                        serviceCache.delete(context, cacheAcceptationOperationSource);
-                    } finally {
-                        serviceCache.getCacheManagement().getCacheObserver().observe(context.getEventBuilder().build());
-                    }
-                    return null;
-                }, cacheAcceptationOperationSource instanceof AbstractListableOperationSource);
-            }
+        for (CacheOperation cacheOperation : cacheOperations) {
+            AbstractProcessor processor = management.getProcessor(cacheOperation);
+            InvocationContext context = new InvocationContext();
+            context.setTarget(target);
+            context.setMethod(method);
+            context.setArgs(args);
+            // always delete list cache first, because complex cache dose not just delete key, also need cache key to find some other records
+            push(operations, () -> {
+                try {
+                    logger.debug("Delete context: {}", context);
+                    processor.delete(context, cacheOperation);
+                } finally {
+                }
+                return null;
+            }, cacheOperation instanceof ListCacheOperation);
         }
-
         return evictionContext;
     }
 
@@ -325,13 +295,12 @@ public class InvocationInterceptor {
             operations.addAll(acceptationContext.operations);
         }
 
-        Object proceed(Consumer<?> invokeMonitor, Supplier<?> methodInvoker) {
+        Object proceed(Supplier<?> methodInvoker) {
             if (CommonUtils.isEmpty(operations)) {
                 return methodInvoker.get();
             }
             Object result = null;
             for (Supplier<?> operation : operations) {
-                invokeMonitor.accept(null);
                 result = operation.get();
             }
             return result;

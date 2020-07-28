@@ -1,9 +1,9 @@
 package com.atpex.archer.components.preset;
 
-import com.atpex.archer.components.KeyGenerator;
+import com.atpex.archer.components.api.KeyGenerator;
 import com.atpex.archer.exception.CacheOperationException;
-import com.atpex.archer.metadata.AbstractCacheMetadata;
-import com.atpex.archer.metadata.impl.ListCacheMetadata;
+import com.atpex.archer.metadata.api.AbstractCacheMetadata;
+import com.atpex.archer.metadata.ListCacheMetadata;
 import com.atpex.archer.util.CommonUtils;
 import com.atpex.archer.util.SpringElUtil;
 
