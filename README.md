@@ -1,4 +1,4 @@
-![logo](./doc/img/archer_logo_500.png)
+![logo](./doc/img/archer_logo_200.png)
 
 #![coverage](https://img.shields.io/badge/coverage-80.5%25-brightgreen) ![version](https://img.shields.io/badge/version-1.0.0-ff69b4) 
 
