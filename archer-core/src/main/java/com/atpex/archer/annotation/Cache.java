@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * Cache annotation
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 @Documented
 @Retention(RUNTIME)

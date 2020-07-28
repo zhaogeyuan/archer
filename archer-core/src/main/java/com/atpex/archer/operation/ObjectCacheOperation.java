@@ -10,7 +10,7 @@ import com.atpex.archer.roots.ObjectComponent;
  *
  * @param <V> cache value type
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class ObjectCacheOperation<V> extends CacheOperation<ObjectCacheMetadata, V> implements ObjectComponent {
 

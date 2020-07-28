@@ -9,7 +9,7 @@ import com.atpex.archer.metadata.ListCacheMetadata;
  * Internal element key generator
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class InternalElementKeyGenerator extends AbstractInternalKeyGenerator {
 

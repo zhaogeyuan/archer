@@ -5,13 +5,14 @@ import com.atpex.archer.annotation.Cache;
 import com.atpex.archer.cache.internal.ShardingCache;
 import com.atpex.archer.components.internal.InternalElementKeyGenerator;
 import com.atpex.archer.components.internal.InternalKeyGenerator;
-import com.atpex.archer.components.internal.InternalKeySerializer;
 import com.atpex.archer.metadata.CacheMetadata;
-import com.atpex.archer.stats.event.api.CacheEvent;
-import com.atpex.archer.stats.event.collector.AnonymousCacheEventCollector;
-import com.atpex.archer.stats.observer.CacheMetricsObserver;
 import com.atpex.archer.operation.CacheOperation;
 import com.atpex.archer.processor.context.InvocationContext;
+import com.atpex.archer.stats.api.CacheEvent;
+import com.atpex.archer.stats.api.CacheEventCollector;
+import com.atpex.archer.stats.api.listener.CacheStatsListener;
+import com.atpex.archer.stats.collector.NamedCacheEventCollector;
+import com.atpex.archer.stats.event.CacheBreakdownProtectedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,23 +30,19 @@ import java.util.function.Supplier;
  * Abstract service cache processor
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public abstract class AbstractProcessor<C extends CacheOperation<?, V>, V> implements Processor<InvocationContext, C, V> {
 
     private final static Logger logger = LoggerFactory.getLogger(AbstractProcessor.class);
 
-    protected final InternalKeyGenerator keyGenerator = new InternalKeyGenerator();
+    private final InternalKeyGenerator keyGenerator = new InternalKeyGenerator();
 
-    protected final InternalElementKeyGenerator elementKeyGenerator = new InternalElementKeyGenerator();
+    private final InternalElementKeyGenerator elementKeyGenerator = new InternalElementKeyGenerator();
 
-    protected final InternalKeySerializer serializer = new InternalKeySerializer();
-
-    protected final AnonymousCacheEventCollector anonymousCacheEventCollector = new AnonymousCacheEventCollector();
+    private final NamedCacheEventCollector anonymousCacheEventCollector = new NamedCacheEventCollector("anonymous");
 
     protected ShardingCache cache;
-
-    protected CacheMetricsObserver<CacheEvent> cacheObserver;
 
     private volatile ConcurrentHashMap<Object, BreakdownProtectionLock> loaderMap;
 
@@ -143,10 +140,11 @@ public abstract class AbstractProcessor<C extends CacheOperation<?, V>, V> imple
                 cacheOperation.getMetadata().getBreakdownProtectTimeoutInMillis(),
                 () -> load(context, cacheOperation),
                 v -> put(context, v, cacheOperation),
-                () -> loadAndPut0(context, cacheOperation));
+                () -> loadAndPut0(context, cacheOperation),
+                cacheOperation.getCacheEventCollector());
     }
 
-    private <V0> V0 doSynchronizedLoadAndPut(String lockKey, long breakdownTimeout, Supplier<V0> load, Consumer<V0> put, Supplier<V0> loadAndPut) {
+    private <V0> V0 doSynchronizedLoadAndPut(String lockKey, long breakdownTimeout, Supplier<V0> load, Consumer<V0> put, Supplier<V0> loadAndPut, CacheEventCollector cacheEventCollector) {
         ConcurrentHashMap<Object, BreakdownProtectionLock> loaderMap = initOrGetLoaderMap();
         while (true) {
             boolean[] created = new boolean[1];
@@ -171,6 +169,7 @@ public abstract class AbstractProcessor<C extends CacheOperation<?, V>, V> imple
                     }
                 }
             } else {
+                CacheBreakdownProtectedEvent cacheBreakdownProtectedEvent = new CacheBreakdownProtectedEvent();
                 try {
                     if (breakdownTimeout <= 0) {
                         bpl.signal.await();
@@ -184,6 +183,8 @@ public abstract class AbstractProcessor<C extends CacheOperation<?, V>, V> imple
                 } catch (InterruptedException e) {
                     logger.debug("loader wait interrupted");
                     return loadAndPut.get();
+                } finally {
+                    cacheEventCollector.collect(cacheBreakdownProtectedEvent);
                 }
                 if (bpl.success) {
                     return (V0) bpl.value;
@@ -230,7 +231,8 @@ public abstract class AbstractProcessor<C extends CacheOperation<?, V>, V> imple
                 cacheOperation.getMetadata().getBreakdownProtectTimeoutInMillis(),
                 () -> loadAll(contexts, cacheOperation),
                 v -> putAll(v, cacheOperation),
-                () -> loadAndPutAll0(contexts, cacheOperation));
+                () -> loadAndPutAll0(contexts, cacheOperation),
+                cacheOperation.getCacheEventCollector());
     }
 
 
@@ -247,8 +249,9 @@ public abstract class AbstractProcessor<C extends CacheOperation<?, V>, V> imple
     }
 
     public void afterInitialized(CacheManager cacheManager) {
-        //
-        cacheObserver = cacheManager.getCacheObserver();
+        for (CacheStatsListener<CacheEvent> statsListener : cacheManager.getStatsListenerMap().values()) {
+            anonymousCacheEventCollector.register(statsListener);
+        }
         cache = cacheManager.getShardingCache();
     }
 }

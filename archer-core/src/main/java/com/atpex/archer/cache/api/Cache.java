@@ -1,6 +1,6 @@
 package com.atpex.archer.cache.api;
 
-import com.atpex.archer.stats.event.api.CacheEventCollector;
+import com.atpex.archer.stats.api.CacheEventCollector;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -10,7 +10,7 @@ import java.util.Map;
  * Cache operation
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public interface Cache {
 

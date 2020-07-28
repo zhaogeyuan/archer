@@ -1,7 +1,7 @@
 package com.atpex.archer.cache.preset;
 
 import com.atpex.archer.cache.api.Cache;
-import com.atpex.archer.stats.event.api.CacheEventCollector;
+import com.atpex.archer.stats.api.CacheEventCollector;
 import com.atpex.archer.stats.event.CacheAccessEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import java.util.*;
  * Only for debugging
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class HashMapCache implements Cache {
 

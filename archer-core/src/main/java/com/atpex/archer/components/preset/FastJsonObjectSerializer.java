@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
  * Fast json object value serializer
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class FastJsonObjectSerializer<V> implements ValueSerializer<V> {
 

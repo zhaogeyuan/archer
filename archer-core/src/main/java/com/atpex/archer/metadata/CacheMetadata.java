@@ -6,7 +6,7 @@ import com.atpex.archer.metadata.api.AbstractCacheMetadata;
  * Cache metadata
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class CacheMetadata extends AbstractCacheMetadata {
 

@@ -3,7 +3,6 @@ package com.atpex.archer.util;
 import com.atpex.archer.CacheManager;
 import com.atpex.archer.components.api.KeyGenerator;
 import com.atpex.archer.components.api.Serializer;
-import com.atpex.archer.stats.listener.InternalCacheHitRateListener;
 import com.atpex.archer.operation.CacheOperation;
 import com.atpex.archer.operation.EvictionOperation;
 import org.slf4j.Logger;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
  * Info printer
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class InfoPrinter {
 
@@ -63,29 +62,6 @@ public class InfoPrinter {
         }
         stringBuilder.append(generateFooter(width, titles.size()));
         return stringBuilder.toString();
-    }
-
-    /**
-     * @param hitRateInfo
-     */
-    public static void printHitRate(Map<String, InternalCacheHitRateListener.HitRateInfo> hitRateInfo) {
-        StringBuilder stringBuilder =
-                new StringBuilder(generateTitle(12,
-                        "Hit",
-                        "Total",
-                        "Rate",
-                        "Penetrated",
-                        "Q-times",
-                        "Type"));
-        hitRateInfo.forEach((t, info) -> stringBuilder.append(generateValueBorderless(12,
-                info.getHitDataSize(),
-                info.getTotalDataSize(),
-                percentage(info.getHitDataSize(), info.getTotalDataSize()),
-                info.isPenetrated(),
-                info.getQueryingTimes(),
-                t)));
-        stringBuilder.append(generateFooter(12, 6));
-        logger.debug(stringBuilder.toString());
     }
 
 

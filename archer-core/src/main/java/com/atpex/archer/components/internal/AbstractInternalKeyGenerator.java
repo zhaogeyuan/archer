@@ -12,7 +12,7 @@ import java.util.Map;
  * Abstract internal key generator
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public abstract class AbstractInternalKeyGenerator implements KeyGenerator {
 

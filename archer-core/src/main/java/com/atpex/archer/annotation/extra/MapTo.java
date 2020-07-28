@@ -1,6 +1,6 @@
 package com.atpex.archer.annotation.extra;
 
-import com.himalaya.service.cacheable.annotation.MultipleCacheable;
+import com.atpex.archer.annotation.CacheMulti;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -10,7 +10,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link MultipleCacheable} support annotation
+ * {@link CacheMulti} support annotation
  * <p>
  * Map parameter to result element field to </br>
  * make handling noise element or absent element correctly. </br>
@@ -28,8 +28,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * With this annotation, all parameters could be mapped to absolute result elements.</br>
  *
  * @author atpexgo.wu
- * @see MultipleCacheable
- * @since 1.0.0
+ * @see CacheMulti
+ * @since 1.0
  */
 @Documented
 @Retention(RUNTIME)

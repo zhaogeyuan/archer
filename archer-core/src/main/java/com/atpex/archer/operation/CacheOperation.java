@@ -12,7 +12,7 @@ import com.atpex.archer.operation.api.AbstractCacheOperation;
  * @param <V> cache value type
  * @author atpexgo.wu
  * @see CacheMetadata
- * @since 1.0.0
+ * @since 1.0
  */
 public class CacheOperation<M extends CacheMetadata, V> extends AbstractCacheOperation<M> {
 

@@ -6,16 +6,23 @@ import com.atpex.archer.operation.ListCacheOperation;
 import com.atpex.archer.processor.api.AbstractProcessor;
 import com.atpex.archer.processor.context.InvocationContext;
 import com.atpex.archer.roots.ListComponent;
+import com.atpex.archer.stats.event.CacheHitEvent;
+import com.atpex.archer.stats.event.CacheMissEvent;
+import com.atpex.archer.stats.event.CachePenetrationProtectedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.atpex.archer.annotation.CacheList;
 
 import java.util.*;
 
 /**
- * Abstract listable service cache processor
+ * List cache processor
  *
+ * @param <V> cache value type
+ * @see ListCacheOperation
+ * @see CacheList
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class ListProcessor<V> extends AbstractProcessor<ListCacheOperation<V>, Collection<V>> implements ListComponent {
 
@@ -36,8 +43,11 @@ public class ListProcessor<V> extends AbstractProcessor<ListCacheOperation<V>, C
         Cache.Entry entry = cache.get(key, cacheOperation.getCacheEventCollector());
         if (entry == null) {
             // cache is missing
+            cacheOperation.getCacheEventCollector().collect(new CacheMissEvent());
             return loadAndPut(context, cacheOperation);
         } else if (entry.getValue() == null) {
+            cacheOperation.getCacheEventCollector().collect(new CachePenetrationProtectedEvent());
+            cacheOperation.getCacheEventCollector().collect(new CacheHitEvent());
             // cache value is null
             return null;
         } else {
@@ -46,6 +56,7 @@ public class ListProcessor<V> extends AbstractProcessor<ListCacheOperation<V>, C
 
         if (allCacheKeys == null) {
             // treat as cache is missing
+            cacheOperation.getCacheEventCollector().collect(new CacheMissEvent());
             return loadAndPut(context, cacheOperation);
         }
 
@@ -58,6 +69,7 @@ public class ListProcessor<V> extends AbstractProcessor<ListCacheOperation<V>, C
             Cache.Entry cacheObject = cacheEntry.getValue();
             if (cacheObject == null) {
                 // treat as cache is missing
+                cacheOperation.getCacheEventCollector().collect(new CacheMissEvent());
                 return loadAndPut(context, cacheOperation);
             }
             V deserialized;
@@ -65,9 +77,11 @@ public class ListProcessor<V> extends AbstractProcessor<ListCacheOperation<V>, C
                 deserialized = cacheOperation.getValueSerializer().looseDeserialize(cacheObject.getValue());
                 if (deserialized == null) {
                     // deserialized failed, treat as cache is missing
+                    cacheOperation.getCacheEventCollector().collect(new CacheMissEvent());
                     return loadAndPut(context, cacheOperation);
                 }
             } else {
+                cacheOperation.getCacheEventCollector().collect(new CachePenetrationProtectedEvent());
                 // cached object self is null, treat as null
                 deserialized = null;
             }
@@ -80,6 +94,7 @@ public class ListProcessor<V> extends AbstractProcessor<ListCacheOperation<V>, C
             result.add(resultMap.get(cacheKey));
         }
 
+        cacheOperation.getCacheEventCollector().collect(new CacheHitEvent());
         return result;
     }
 
@@ -117,7 +132,7 @@ public class ListProcessor<V> extends AbstractProcessor<ListCacheOperation<V>, C
 
     @Override
     public void putAll(Map<InvocationContext, Collection<V>> contextValueMap, ListCacheOperation<V> cacheOperation) {
-// may be more elegant? not to use looping
+        // may be more elegant? not to use looping
         for (Map.Entry<? extends InvocationContext, ? extends Collection<V>> entry : contextValueMap.entrySet()) {
             put(entry.getKey(), entry.getValue(), cacheOperation);
         }

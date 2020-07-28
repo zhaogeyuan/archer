@@ -18,12 +18,12 @@ import com.atpex.archer.invocation.InvocationInterceptor;
 import com.atpex.archer.metadata.EvictionMetadata;
 import com.atpex.archer.metadata.ListCacheMetadata;
 import com.atpex.archer.metadata.ObjectCacheMetadata;
-import com.atpex.archer.stats.listener.CacheMetricsListener;
-import com.atpex.archer.stats.listener.InternalCacheHitRateListener;
-import com.atpex.archer.stats.observer.InternalCacheMetricsObserver;
+import com.atpex.archer.stats.api.CacheEventCollector;
+import com.atpex.archer.stats.api.listener.CacheStatsListener;
 import com.atpex.archer.operation.EvictionOperation;
 import com.atpex.archer.operation.ListCacheOperation;
 import com.atpex.archer.operation.ObjectCacheOperation;
+import com.atpex.archer.stats.collector.NamedCacheEventCollector;
 import com.atpex.archer.util.CacheResolver;
 import com.atpex.archer.util.ReflectionUtil;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ import java.util.function.Supplier;
  * The starter of archer cache framework
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 @SuppressWarnings("all")
 public class Archer {
@@ -61,7 +61,7 @@ public class Archer {
 
     private final Map<String, ValueSerializer> valueSerializerMap = new ConcurrentHashMap<>();
 
-    private final Set<CacheMetricsListener> metricsListeners = new ConcurrentSkipListSet<>();
+    private final Set<CacheStatsListener> statsListeners = new ConcurrentSkipListSet<>();
 
     private final CacheManager cacheManager = new CacheManager();
 
@@ -87,8 +87,8 @@ public class Archer {
         return this;
     }
 
-    public Archer addMetricsListener(CacheMetricsListener metricsListener) {
-        this.metricsListeners.add(metricsListener);
+    public Archer addStatsListener(CacheStatsListener metricsListener) {
+        this.statsListeners.add(metricsListener);
         return this;
     }
 
@@ -110,19 +110,6 @@ public class Archer {
     public Starter init() {
         cacheManager.getSerializerMap().putAll(valueSerializerMap);
         cacheManager.getKeyGeneratorMap().putAll(keyGeneratorMap);
-
-        InternalCacheMetricsObserver cacheMetricsObserver = new InternalCacheMetricsObserver();
-        for (CacheMetricsListener metricsListener : this.metricsListeners) {
-            cacheMetricsObserver.register(metricsListener);
-        }
-
-        InternalCacheHitRateListener internalCacheHitRateListener = new InternalCacheHitRateListener();
-        if (CacheManager.Config.metricsEnabled) {
-            internalCacheHitRateListener.startPrint();
-        }
-        cacheMetricsObserver.register(internalCacheHitRateListener);
-
-        cacheManager.setCacheObserver(cacheMetricsObserver);
 
         sharding();
         cacheManager.initialized();
@@ -153,6 +140,13 @@ public class Archer {
             EvictionMetadata metadata = (EvictionMetadata) CacheResolver.resolveMetadata(declaredMethod, cacheEvictAnnotation);
             EvictionOperation evictionOperation = new EvictionOperation();
             evictionOperation.setMetadata(metadata);
+            CacheEventCollector cacheEventCollector = new NamedCacheEventCollector(metadata.getMethodSignature());
+            if(CacheManager.Config.metricsEnabled) {
+                for (CacheStatsListener statsListener : this.statsListeners) {
+                    cacheEventCollector.register(statsListener);
+                }
+            }
+            evictionOperation.setCacheEventCollector(cacheEventCollector);
             evictionOperation.initialized();
             String name = "eviction" + UUID.randomUUID().toString();
             cacheManager.getEvictionOperationMap().put(name, evictionOperation);
@@ -200,6 +194,14 @@ public class Archer {
                     );
                 }
 
+                CacheEventCollector cacheEventCollector = new NamedCacheEventCollector(metadata.getMethodSignature());
+                if(CacheManager.Config.metricsEnabled) {
+                    for (CacheStatsListener statsListener : this.statsListeners) {
+                        cacheEventCollector.register(statsListener);
+                    }
+                }
+                cacheOperation.setCacheEventCollector(cacheEventCollector);
+
                 cacheOperation.initialized();
                 String name = "cacheable" + UUID.randomUUID().toString();
                 cacheManager.getCacheOperationMap().put(name, cacheOperation);
@@ -240,6 +242,14 @@ public class Archer {
                             internalValueSerializers.get(cacheEntityType.getTypeName())
                     );
                 }
+
+                CacheEventCollector cacheEventCollector = new NamedCacheEventCollector(metadata.getMethodSignature());
+                if(CacheManager.Config.metricsEnabled) {
+                    for (CacheStatsListener statsListener : this.statsListeners) {
+                        cacheEventCollector.register(statsListener);
+                    }
+                }
+                listCacheOperation.setCacheEventCollector(cacheEventCollector);
 
                 listCacheOperation.initialized();
                 String name = "listCacheable" + UUID.randomUUID().toString();

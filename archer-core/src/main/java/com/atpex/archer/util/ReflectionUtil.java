@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Reflection util
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class ReflectionUtil extends Reflections {
@@ -281,7 +281,7 @@ public class ReflectionUtil extends Reflections {
     public static <T extends Annotation> T getCacheAnnotation(Class clazz, Class<T> annotationType) {
         String signature = getSignatureForCache(clazz);
         Annotation annotation = TYPE_ANNOTATIONS.getOrDefault(signature, null);
-        if (annotation.annotationType().getName().equals(annotationType.getName())) {
+        if (annotation != null && annotation.annotationType().getName().equals(annotationType.getName())) {
             return (T) annotation;
         }
         return null;

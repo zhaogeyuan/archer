@@ -11,7 +11,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * {@link EvictMulti} container
  *
  * @author atpexgo
- * @since 1.0.0
+ * @since 1.0
  */
 @Documented
 @Retention(RUNTIME)

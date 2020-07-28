@@ -2,7 +2,7 @@ package com.atpex.archer.operation.api;
 
 import com.atpex.archer.roots.Component;
 import com.atpex.archer.metadata.api.AbstractCacheMetadata;
-import com.atpex.archer.stats.event.api.CacheEventCollector;
+import com.atpex.archer.stats.api.CacheEventCollector;
 
 import static com.atpex.archer.constants.Constants.DEFAULT_DELIMITER;
 
@@ -10,7 +10,7 @@ import static com.atpex.archer.constants.Constants.DEFAULT_DELIMITER;
  * Abstract cache operation
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public abstract class AbstractCacheOperation<M extends AbstractCacheMetadata> implements Component {
 

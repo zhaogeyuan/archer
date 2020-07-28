@@ -9,7 +9,7 @@ import com.atpex.archer.annotation.CacheMulti;
  * @author atpexgo.wu
  * @see Cache
  * @see CacheMulti
- * @since 1.0.0
+ * @since 1.0
  */
 public class ObjectCacheMetadata extends CacheMetadata {
 

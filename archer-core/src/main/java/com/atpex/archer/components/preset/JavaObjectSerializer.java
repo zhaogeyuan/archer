@@ -9,7 +9,7 @@ import java.io.*;
  * Java object serializer
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class JavaObjectSerializer<T> implements ValueSerializer<T> {
 

@@ -10,7 +10,18 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>archer-core</module>
+        <module>archer-spring</module>
+        <module>archer-spring-autoconfigure</module>
+        <module>archer-redis</module>
+        <module>archer-caffeine</module>
+        <module>archer-spring-boot-starter</module>
     </modules>
 
+    <properties>
+        <archer.version>1.0-SNAPSHOT</archer.version>
+        <spring.version>4.0.0.RELEASE</spring.version>
+        <spring.boot.version>1.0.0.RELEASE</spring.boot.version>
+        <spring.boot.auto.configure.version>1.2.0.RELEASE</spring.boot.auto.configure.version>
+    </properties>
 
 </project>

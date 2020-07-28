@@ -1,0 +1,9 @@
+com\atpex\archer\spring\autoconfigure\annotation\EnableArcher.class
+com\atpex\archer\spring\autoconfigure\properties\CacheProperties.class
+com\atpex\archer\spring\autoconfigure\ActiveModeConfigSelector$1.class
+com\atpex\archer\spring\autoconfigure\ArcherProxyConfiguration.class
+com\atpex\archer\spring\autoconfigure\PropertiesAutoConfiguration.class
+com\atpex\archer\spring\autoconfigure\ConfigSelector.class
+com\atpex\archer\spring\autoconfigure\ActiveModeConfigSelector.class
+META-INF\spring-configuration-metadata.json
+com\atpex\archer\spring\autoconfigure\properties\CacheProperties$RedisConfig.class

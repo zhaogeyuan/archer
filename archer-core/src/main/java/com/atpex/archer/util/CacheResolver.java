@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * Cache resolver
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class CacheResolver {
 
@@ -235,7 +235,7 @@ public class CacheResolver {
             // check if @MapTo is declared and then resolve it
             Map<Integer, Annotation> indexedMapTo = ReflectionUtil.getIndexedMethodParameterCacheAnnotations(method);
             if (CommonUtils.isEmpty(indexedMapTo)) {
-                throw new CacheOperationException("The parameter of method declaring @MultipleCacheable should declare @MapTo.");
+                throw new CacheOperationException("The parameter of method declaring @CacheMulti should declare @MapTo.");
             }
 
             // gather all arguments declaring @MapTo to MappedArguments, and map it to context

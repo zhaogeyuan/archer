@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
  * Exclusive key generator
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class ExclusiveKeyGenerator implements KeyGenerator {
 

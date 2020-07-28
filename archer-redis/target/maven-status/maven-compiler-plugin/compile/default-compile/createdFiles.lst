@@ -1,0 +1,4 @@
+com\atpex\archer\cache\redis\RedisCacheInitializer.class
+com\atpex\archer\cache\redis\RedisCache.class
+com\atpex\archer\cache\redis\Constant.class
+com\atpex\archer\cache\redis\RedisShard.class

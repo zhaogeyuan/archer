@@ -17,7 +17,7 @@ import java.util.function.Function;
  * SpringEL expression util
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class SpringElUtil {
 

@@ -15,7 +15,7 @@ import java.lang.reflect.Type;
  * Internal object value serializer
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public final class InternalObjectValueSerializer<V> implements ValueSerializer<V> {
 

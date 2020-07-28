@@ -1,14 +1,16 @@
 package com.atpex.archer.stats.event;
 
-import com.atpex.archer.stats.event.api.CacheEvent;
+import com.atpex.archer.stats.api.CacheEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Cache access event
+ * Cache time elapsing event
+ *
+ * Produced to count cache accessing time elapsing
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class CacheTimeElapsingEvent implements CacheEvent {
 

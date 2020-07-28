@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 /**
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class KryoObjectSerializer<T> implements ValueSerializer<T> {
 

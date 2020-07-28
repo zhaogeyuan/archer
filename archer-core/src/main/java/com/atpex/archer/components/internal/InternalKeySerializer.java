@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
  * Internal key serializer
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class InternalKeySerializer implements Serializer<String, byte[]> {
 

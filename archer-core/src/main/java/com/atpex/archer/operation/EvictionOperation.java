@@ -7,7 +7,7 @@ import com.atpex.archer.operation.api.AbstractCacheOperation;
  * Cache eviction operation
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class EvictionOperation extends AbstractCacheOperation<EvictionMetadata> {
 

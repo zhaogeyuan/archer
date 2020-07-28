@@ -6,7 +6,7 @@ import com.atpex.archer.cache.api.ShardingConfigure;
 import com.atpex.archer.stats.event.CacheAccessEvent;
 import com.atpex.archer.stats.event.CachePositivelyEvictEvent;
 import com.atpex.archer.stats.event.CacheTimeElapsingEvent;
-import com.atpex.archer.stats.event.api.CacheEventCollector;
+import com.atpex.archer.stats.api.CacheEventCollector;
 import com.atpex.archer.util.CommonUtils;
 
 import java.util.*;
@@ -15,7 +15,7 @@ import java.util.*;
  * Sharding cache operation source
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class ShardingCache implements Cache {
 

@@ -6,8 +6,10 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
+ * Invocation context
+ *
  * @author atpexgo
- * @since 1.0.0
+ * @since 1.0
  */
 public class InvocationContext {
 

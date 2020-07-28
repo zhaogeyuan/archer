@@ -8,6 +8,9 @@ import com.atpex.archer.operation.ObjectCacheOperation;
 import com.atpex.archer.processor.api.AbstractProcessor;
 import com.atpex.archer.processor.context.InvocationContext;
 import com.atpex.archer.roots.ObjectComponent;
+import com.atpex.archer.stats.event.CacheHitEvent;
+import com.atpex.archer.stats.event.CacheMissEvent;
+import com.atpex.archer.stats.event.CachePenetrationProtectedEvent;
 import com.atpex.archer.util.CommonUtils;
 import com.atpex.archer.util.ReflectionUtil;
 import com.atpex.archer.util.SpringElUtil;
@@ -20,12 +23,12 @@ import java.util.*;
 /**
  * Object cache processor
  *
- * @param <V> cache value type
- * @author atpexgo.wu
  * @see ObjectCacheOperation
  * @see com.atpex.archer.annotation.Cache
  * @see com.atpex.archer.annotation.CacheMulti
- * @since 1.0.0
+ * @param <V> cache value type
+ * @author atpexgo.wu
+ * @since 1.0
  */
 public class ObjectProcessor<V> extends AbstractProcessor<ObjectCacheOperation<V>, V> implements ObjectComponent {
 
@@ -35,13 +38,19 @@ public class ObjectProcessor<V> extends AbstractProcessor<ObjectCacheOperation<V
     public V get(InvocationContext context, ObjectCacheOperation<V> cacheOperation) {
         ObjectCacheMetadata metadata = cacheOperation.getMetadata();
         logger.debug("Get invocation context {}", context);
+        if(metadata.getInvokeAnyway()){
+            return loadAndPut(context, cacheOperation);
+        }
         String key = generateCacheKey(context, cacheOperation.getMetadata());
-        Cache.Entry entry = metadata.getInvokeAnyway() ? null : cache.get(key, cacheOperation.getCacheEventCollector());
+        Cache.Entry entry = cache.get(key, cacheOperation.getCacheEventCollector());
         if (entry == null) {
-            // not cached or 'invokeAnyway' flag is true
+            // cache is missing
+            cacheOperation.getCacheEventCollector().collect(new CacheMissEvent());
             return loadAndPut(context, cacheOperation);
         } else if (entry.getValue() == null) {
+            cacheOperation.getCacheEventCollector().collect(new CachePenetrationProtectedEvent());
             logger.debug("Cache hit, value is NULL");
+            cacheOperation.getCacheEventCollector().collect(new CacheHitEvent());
             // cached but value is really set to NULL
             return null;
         }
@@ -53,6 +62,7 @@ public class ObjectProcessor<V> extends AbstractProcessor<ObjectCacheOperation<V
         }
 
         logger.debug("Cache hit");
+        cacheOperation.getCacheEventCollector().collect(new CacheHitEvent());
         return value;
     }
 
@@ -73,6 +83,7 @@ public class ObjectProcessor<V> extends AbstractProcessor<ObjectCacheOperation<V
 
         if (CommonUtils.isEmpty(entryMap)) {
             logger.debug("No entity in cache found..., load all");
+            cacheOperation.getCacheEventCollector().collect(new CacheMissEvent());
             return loadAndPutAll(invocationContexts, cacheOperation);
         }
 
@@ -94,9 +105,11 @@ public class ObjectProcessor<V> extends AbstractProcessor<ObjectCacheOperation<V
             if (isCacheMissing || isCacheDeserializingFail) {
                 missCount++;
                 missedContextList.add(context);
+                cacheOperation.getCacheEventCollector().collect(new CacheMissEvent());
                 // take place first, keep the order right
                 resultEntryMap.put(context, null);
             } else {
+                cacheOperation.getCacheEventCollector().collect(new CacheHitEvent());
                 resultEntryMap.put(context, entry);
             }
         }
@@ -110,6 +123,7 @@ public class ObjectProcessor<V> extends AbstractProcessor<ObjectCacheOperation<V
         // if noise data exists, load method every time
         if (missCount > 0 && loadedResult.size() < missCount && loadedResult.containsKey(null)) {
             // load from method;
+            cacheOperation.getCacheEventCollector().collect(new CacheMissEvent());
             throw new FallbackException();
         }
 
@@ -195,7 +209,7 @@ public class ObjectProcessor<V> extends AbstractProcessor<ObjectCacheOperation<V
         private final V object;
         private final Object order;
 
-        public OrderedHolder(InvocationContext key, V object, Object order) {
+        OrderedHolder(InvocationContext key, V object, Object order) {
             this.key = key;
             this.object = object;
             this.order = order;

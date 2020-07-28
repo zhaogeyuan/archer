@@ -9,7 +9,7 @@ import java.util.Map;
  *
  * @param <V> value type
  * @author atpexgo
- * @since 1.0.0
+ * @since 1.0
  */
 public interface Processor<CONTEXT, OPERATION, V> {
 

@@ -7,7 +7,7 @@ import com.atpex.archer.roots.Component;
  * Cache operation shard info
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public interface CacheShard extends Component {
 

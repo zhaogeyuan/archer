@@ -1,0 +1,4 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.atpex.archer.spring.autoconfigure.PropertiesAutoConfiguration,\
+com.atpex.archer.spring.config.ArcherCommonConfiguration

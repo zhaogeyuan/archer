@@ -8,7 +8,7 @@ import com.atpex.archer.metadata.api.AbstractCacheMetadata;
  *
  * @author atpexgo.wu
  * @see Evict
- * @since 1.0.0
+ * @since 1.0
  */
 public class EvictionMetadata extends AbstractCacheMetadata {
 

@@ -8,7 +8,7 @@ import com.atpex.archer.metadata.api.AbstractCacheMetadata;
  * Internal key generator
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class InternalKeyGenerator extends AbstractInternalKeyGenerator {
 

@@ -4,7 +4,7 @@ package com.atpex.archer.components.api;
  * Serializer
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public interface Serializer<R, S> {
 

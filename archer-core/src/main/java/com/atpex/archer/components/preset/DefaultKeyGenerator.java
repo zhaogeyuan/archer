@@ -14,7 +14,7 @@ import static com.atpex.archer.constants.Constants.DEFAULT_DELIMITER;
  * Default key generator
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class DefaultKeyGenerator implements KeyGenerator {
 

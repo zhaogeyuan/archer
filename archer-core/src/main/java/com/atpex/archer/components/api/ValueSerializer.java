@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <V>
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public interface ValueSerializer<V> extends Serializer<V, byte[]> {
 

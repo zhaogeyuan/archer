@@ -1,0 +1,66 @@
+{
+  "groups": [
+    {
+      "name": "archer",
+      "type": "com.atpex.archer.spring.autoconfigure.properties.CacheProperties",
+      "sourceType": "com.atpex.archer.spring.autoconfigure.properties.CacheProperties"
+    },
+    {
+      "name": "archer.caffeine",
+      "type": "com.atpex.archer.cache.caffeine.CaffeineConfig",
+      "sourceType": "com.atpex.archer.spring.autoconfigure.properties.CacheProperties",
+      "sourceMethod": "getCaffeine()",
+      "description": "Only enabled if redis is not configured."
+    },
+    {
+      "name": "archer.redis",
+      "type": "com.atpex.archer.spring.autoconfigure.properties.CacheProperties$RedisConfig",
+      "sourceType": "com.atpex.archer.spring.autoconfigure.properties.CacheProperties",
+      "sourceMethod": "getRedis()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "archer.caffeine.expire-after-write-in-second",
+      "type": "java.lang.Integer",
+      "sourceType": "com.atpex.archer.cache.caffeine.CaffeineConfig",
+      "description": "Expiration after cache wrote.",
+      "defaultValue": 10
+    },
+    {
+      "name": "archer.caffeine.initial-capacity",
+      "type": "java.lang.Integer",
+      "sourceType": "com.atpex.archer.cache.caffeine.CaffeineConfig",
+      "description": "Cache initial capacity.",
+      "defaultValue": 1
+    },
+    {
+      "name": "archer.caffeine.maximum-size",
+      "type": "java.lang.Integer",
+      "sourceType": "com.atpex.archer.cache.caffeine.CaffeineConfig",
+      "description": "Cache maximum size.",
+      "defaultValue": "Integer.MAX_VALUE"
+    },
+    {
+      "name": "archer.redis.connect-timeout",
+      "type": "java.lang.Long",
+      "sourceType": "com.atpex.archer.spring.autoconfigure.properties.CacheProperties$RedisConfig",
+      "description": "Connection timeout for all shards.",
+      "defaultValue": 2000
+    },
+    {
+      "name": "archer.redis.read-timeout",
+      "type": "java.lang.Long",
+      "sourceType": "com.atpex.archer.spring.autoconfigure.properties.CacheProperties$RedisConfig",
+      "description": "Read timeout for all shards.",
+      "defaultValue": 2000
+    },
+    {
+      "name": "archer.redis.shards",
+      "type": "java.util.List<com.atpex.archer.cache.redis.RedisShard>",
+      "sourceType": "com.atpex.archer.spring.autoconfigure.properties.CacheProperties$RedisConfig",
+      "description": "Redis shards info."
+    }
+  ],
+  "hints": []
+}

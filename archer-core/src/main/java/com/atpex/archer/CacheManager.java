@@ -7,8 +7,7 @@ import com.atpex.archer.constants.Serialization;
 import com.atpex.archer.exception.CacheOperationException;
 import com.atpex.archer.expression.CacheExpressionUtilObject;
 import com.atpex.archer.metadata.CacheMetadata;
-import com.atpex.archer.stats.event.api.CacheEvent;
-import com.atpex.archer.stats.observer.CacheMetricsObserver;
+import com.atpex.archer.stats.api.CacheEvent;
 import com.atpex.archer.operation.CacheOperation;
 import com.atpex.archer.operation.EvictionOperation;
 import com.atpex.archer.processor.api.AbstractProcessor;
@@ -17,6 +16,7 @@ import com.atpex.archer.processor.ObjectProcessor;
 import com.atpex.archer.roots.Component;
 import com.atpex.archer.roots.ListComponent;
 import com.atpex.archer.roots.ObjectComponent;
+import com.atpex.archer.stats.api.listener.CacheStatsListener;
 import com.atpex.archer.util.CommonUtils;
 import com.atpex.archer.util.SpringElUtil;
 
@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Cache manager
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 @SuppressWarnings("all")
 public class CacheManager implements Component {
@@ -82,9 +82,9 @@ public class CacheManager implements Component {
     private Map<String, AbstractProcessor> processors = new ConcurrentHashMap<>();
 
     /**
-     * Cache observer
+     * Manage all cache stats listeners
      */
-    private CacheMetricsObserver<CacheEvent> cacheObserver;
+    private Map<String, CacheStatsListener> statsListenerMap = new ConcurrentHashMap<>();
 
 
     public ShardingCache getShardingCache() {
@@ -136,14 +136,13 @@ public class CacheManager implements Component {
         this.serializerMap = serializerMap;
     }
 
-    public CacheMetricsObserver<CacheEvent> getCacheObserver() {
-        return cacheObserver;
+    public Map<String, CacheStatsListener> getStatsListenerMap() {
+        return statsListenerMap;
     }
 
-    public void setCacheObserver(CacheMetricsObserver<CacheEvent> cacheObserver) {
-        this.cacheObserver = cacheObserver;
+    public void setStatsListenerMap(Map<String, CacheStatsListener> statsListenerMap) {
+        this.statsListenerMap = statsListenerMap;
     }
-
 
     /**
      * Get acceptation operations by method signature and source type

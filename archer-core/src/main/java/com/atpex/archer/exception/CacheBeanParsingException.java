@@ -4,7 +4,7 @@ package com.atpex.archer.exception;
  * Cache bean parsing exception
  *
  * @author atpexgo.wu
- * @since 1.0.0
+ * @since 1.0
  */
 public class CacheBeanParsingException extends RuntimeException {
 

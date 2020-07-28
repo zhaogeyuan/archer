@@ -17,7 +17,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * Use for batch querying method with multiple keys
  *
  * @author atpexgo
- * @since 1.0.0
+ * @since 1.0
  */
 @Documented
 @Retention(RUNTIME)
