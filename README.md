@@ -6,11 +6,11 @@
 - [入门](#入门)
     - [依赖](#依赖)
     - [注解](#注解)
-        -[对象缓存](#对象缓存)
-        -[多对象缓存](#多对象缓存)
-        -[列表缓存](#列表缓存)
-        -[缓存淘汰](#缓存淘汰)
-        -[全局属性](#全局属性)
+        - [对象缓存](#对象缓存)
+        - [多对象缓存](#多对象缓存)
+        - [列表缓存](#列表缓存)
+        - [缓存淘汰](#缓存淘汰)
+        - [全局属性](#全局属性)
     - [开始使用](#开始使用)
     - [使用redis或caffeine缓存实现](#使用redis或caffeine缓存实现)
     - [Spring](#Spring配置)
@@ -60,7 +60,7 @@ interface UserService {
                 breakdownProtect = true, breakdownProtectTimeout = 300, breakdownProtectTimeUnit = TimeUnit.MILLISECONDS,
                 valueSerializer = "customValueSerializer",
                 keyGenerator = "customKeyGenerator",
-                condition = "1 = 1",
+                condition = "1 == 1",
                 overwrite = false
         )
     User getUserById(long userId);
