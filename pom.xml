@@ -15,6 +15,7 @@
         <module>archer-redis</module>
         <module>archer-caffeine</module>
         <module>archer-spring-boot-starter</module>
+        <module>archer-example</module>
     </modules>
 
     <properties>
