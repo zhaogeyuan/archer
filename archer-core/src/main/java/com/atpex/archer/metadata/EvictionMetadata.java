@@ -14,6 +14,7 @@ public class EvictionMetadata extends AbstractCacheMetadata {
 
     private Boolean afterInvocation;
 
+    private Boolean multiple;
 
     public Boolean getAfterInvocation() {
         return afterInvocation;
@@ -23,10 +24,19 @@ public class EvictionMetadata extends AbstractCacheMetadata {
         this.afterInvocation = afterInvocation;
     }
 
+    public Boolean getMultiple() {
+        return multiple;
+    }
+
+    public void setMultiple(Boolean multiple) {
+        this.multiple = multiple;
+    }
+
     @Override
     public String toString() {
-        return "CacheEvictionMetadata{" +
+        return "EvictionMetadata{" +
                 "afterInvocation=" + afterInvocation +
+                ", multiple=" + multiple +
                 ", cacheAnnotation=" + cacheAnnotation +
                 ", methodSignature='" + methodSignature + '\'' +
                 ", key='" + key + '\'' +

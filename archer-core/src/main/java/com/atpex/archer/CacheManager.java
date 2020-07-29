@@ -244,8 +244,8 @@ public class CacheManager implements Component {
 
     @Override
     public String initializedInfo() {
-        return "\r\n" + "acceptation operation sources : " + cacheOperationMap.size() + "\r\n"
-                + "eviction operation sources : " + evictionOperationMap.size() + "\r\n"
+        return "\r\n" + "cache operations : " + cacheOperationMap.size() + "\r\n"
+                + "eviction operations : " + evictionOperationMap.size() + "\r\n"
                 + "processors : \r\n" + processors + "\r\n";
     }
 }

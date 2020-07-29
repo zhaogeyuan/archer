@@ -12,19 +12,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author: atpex
+ * @author atpex
  * @since 1.0
  */
 public class UserService {
 
-    @Cache(key = "'user:' + #userId",
-            expiration = 7, expirationTimeUnit = TimeUnit.DAYS,
-            breakdownProtect = true, breakdownProtectTimeout = 300, breakdownProtectTimeUnit = TimeUnit.MILLISECONDS,
-            valueSerializer = "customValueSerializer",
-            keyGenerator = "customKeyGenerator",
-            condition = "1 = 1",
-            overwrite = false
-    )
+    @Cache(key = "'user:' + #userId")
     public User getUserById(long userId){
         User user = new User();
         user.setAge(30);
@@ -33,15 +26,7 @@ public class UserService {
         return user;
     }
 
-    @CacheMulti(elementKey = "'user:' + #userIds$each",
-            expiration = 7, expirationTimeUnit = TimeUnit.DAYS,
-            breakdownProtect = true, breakdownProtectTimeout = 300, breakdownProtectTimeUnit = TimeUnit.MILLISECONDS,
-            valueSerializer = "customValueSerializer",
-            keyGenerator = "customKeyGenerator",
-            condition = "1 = 1",
-            overwrite = false,
-            orderBy = "#result$each.age"
-    )
+    @CacheMulti(elementKey = "'user:' + #userIds$each")
     public List<User> getUsersByIdList(@MapTo("#result$each.id") List<Long> userIds){
         List<User> users = new ArrayList<>();
         for (Long userId : userIds) {
@@ -51,15 +36,7 @@ public class UserService {
     }
 
 
-    @CacheList(key = "'user:page:' + #pageId", elementKey = "'user:' + #result$each.id",
-            expiration = 7, expirationTimeUnit = TimeUnit.DAYS,
-            breakdownProtect = true, breakdownProtectTimeout = 300, breakdownProtectTimeUnit = TimeUnit.MILLISECONDS,
-            elementValueSerializer = "customValueSerializer",
-            keyGenerator = "customKeyGenerator",
-            elementKeyGenerator = "customElementKeyGenerator",
-            condition = "#pageId = 1",
-            overwrite = false
-    )
+    @CacheList(key = "'user:page:' + #pageId", elementKey = "'user:' + #result$each.id")
     public List<User> getPagingUsers(int pageId, int pageSize) {
         List<User> users = new ArrayList<>();
         for (Long userId : Arrays.asList(1L,2L)) {

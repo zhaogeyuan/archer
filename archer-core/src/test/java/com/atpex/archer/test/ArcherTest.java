@@ -46,8 +46,8 @@ public class ArcherTest {
         Archer.enableMetrics();
         Archer.serialization(Serialization.FAST_JSON);
         UserService userService = Archer.create(ArcherTest.class.getPackage().getName())
-                .addKeyGenerator("customKeyGenerator", new CustomKeyGenerator())
-                .addValueSerializer("customValueSerializer", new CustomValueSerializer())
+//                .addKeyGenerator("customKeyGenerator", new CustomKeyGenerator())
+//                .addValueSerializer("customValueSerializer", new CustomValueSerializer())
                 .addStatsListener(new AllCacheEventListener()).init().start(UserService.class);
 
         User userById = userService.getUserById(2L);

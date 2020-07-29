@@ -40,8 +40,8 @@ public class InfoPrinter {
         Map<String, Serializer> serializerMap = cacheManager.getSerializerMap();
         Map<String, List<String>> methodSignatureToOperationSourceName = cacheManager.getMethodSignatureToOperationSourceName();
 
-        String evictionConfigInfo = generateTableWithLastColumnBorderless("eviction operation sources", Collections.singletonList("bean"), evictionConfigMap.keySet().stream().map(Collections::singletonList).collect(Collectors.toList()), 50);
-        String acceptationConfigInfo = generateTableWithLastColumnBorderless("acceptation operation sources", Collections.singletonList("bean"), acceptationConfigMap.keySet().stream().map(Collections::singletonList).collect(Collectors.toList()), 50);
+        String evictionConfigInfo = generateTableWithLastColumnBorderless("eviction operations", Collections.singletonList("bean"), evictionConfigMap.keySet().stream().map(Collections::singletonList).collect(Collectors.toList()), 50);
+        String acceptationConfigInfo = generateTableWithLastColumnBorderless("cache operations", Collections.singletonList("bean"), acceptationConfigMap.keySet().stream().map(Collections::singletonList).collect(Collectors.toList()), 50);
         String keyGeneratorInfo = generateTableWithLastColumnBorderless("key generators", Collections.singletonList("bean"), keyGeneratorMap.keySet().stream().map(Collections::singletonList).collect(Collectors.toList()), 50);
         String serializerInfo = generateTableWithLastColumnBorderless("serializers", Collections.singletonList("bean"), serializerMap.keySet().stream().map(Collections::singletonList).collect(Collectors.toList()), 50);
         String methodsInfo = generateTableWithLastColumnBorderless("proxied methods", Collections.singletonList("methods"), methodSignatureToOperationSourceName.keySet().stream().map(Collections::singletonList).collect(Collectors.toList()), 50);

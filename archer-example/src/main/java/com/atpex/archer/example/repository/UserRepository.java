@@ -1,7 +1,6 @@
 package com.atpex.archer.example.repository;
 
 import com.atpex.archer.example.model.User;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -10,7 +9,6 @@ import java.util.*;
  * @author atpexgo.wu
  * @since 1.0.0
  */
-@Component
 public class UserRepository {
 
     public static final int TOTAL = 1000;

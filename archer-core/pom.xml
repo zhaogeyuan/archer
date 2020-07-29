@@ -90,7 +90,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
-            <version>5.0.3.RELEASE</version>
+            <version>${spring.version}</version>
         </dependency>
     </dependencies>
 

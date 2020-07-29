@@ -10,11 +10,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>archer-example</artifactId>
+    <packaging>war</packaging>
+    <name>archer-example</name>
 
+    <properties>
+        <spring.version>4.0.0.RELEASE</spring.version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.atpexgo</groupId>
-            <artifactId>archer-core</artifactId>
+            <artifactId>archer-redis</artifactId>
             <version>${archer.version}</version>
         </dependency>
 
@@ -31,11 +36,11 @@
         </dependency>
 
         <!-- spring家族包 -->
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-redis</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.data</groupId>-->
+<!--            <artifactId>spring-data-redis</artifactId>-->
+<!--            <version>${spring.boot.version}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
@@ -89,16 +94,6 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.9.6</version>
         </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>2.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>2.0.3</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -126,6 +121,7 @@
 
 
     <build>
+        <finalName>archer-example</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

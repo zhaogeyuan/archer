@@ -245,19 +245,37 @@ public class InvocationInterceptor {
         List<Supplier<?>> operations = metadata.getAfterInvocation() ? evictionContext.postOperations : evictionContext.preOperations;
         for (CacheOperation cacheOperation : cacheOperations) {
             AbstractProcessor processor = management.getProcessor(cacheOperation);
-            InvocationContext context = new InvocationContext();
-            context.setTarget(target);
-            context.setMethod(method);
-            context.setArgs(args);
-            // always delete list cache first, because complex cache dose not just delete key, also need cache key to find some other records
-            push(operations, () -> {
-                try {
-                    logger.debug("Delete context: {}", context);
-                    processor.delete(context, cacheOperation);
-                } finally {
+
+            List<InvocationContext> contexts = new ArrayList<>();
+            if(metadata.getMultiple()) {
+                List<Object[]> newArgs = ReflectionUtil.flattenArgs(args);
+                for (Object[] newArg : newArgs) {
+                    InvocationContext context = new InvocationContext();
+                    context.setTarget(target);
+                    context.setMethod(method);
+                    context.setArgs(newArg);
+                    contexts.add(context);
                 }
-                return null;
-            }, cacheOperation instanceof ListCacheOperation);
+
+            }else {
+                InvocationContext context = new InvocationContext();
+                context.setTarget(target);
+                context.setMethod(method);
+                context.setArgs(args);
+                contexts.add(context);
+            }
+
+            for (InvocationContext context : contexts) {
+                // always delete list cache first, because complex cache dose not just delete key, also need cache key to find some other records
+                push(operations, () -> {
+                    try {
+                        logger.debug("Delete context: {}", context);
+                        processor.delete(context, cacheOperation);
+                    } finally {
+                    }
+                    return null;
+                }, cacheOperation instanceof ListCacheOperation);
+            }
         }
         return evictionContext;
     }

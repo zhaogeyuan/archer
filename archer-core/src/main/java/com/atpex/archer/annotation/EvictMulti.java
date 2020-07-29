@@ -26,7 +26,7 @@ public @interface EvictMulti {
      * <p>
      * Support Spring Expression Language (SpEL)
      */
-    String elementkey();
+    String elementKey();
 
     /**
      * Custom key generator name
@@ -39,7 +39,6 @@ public @interface EvictMulti {
      * If evict cache `after` method invocation
      */
     boolean afterInvocation() default false;
-
 
     /**
      * Cache condition

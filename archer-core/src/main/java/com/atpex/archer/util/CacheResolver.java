@@ -58,6 +58,9 @@ public class CacheResolver {
         } else if (annotation instanceof Evict) {
             Evict evict = (Evict) annotation;
             return resolveCacheEvictMetadata(method, annotation, keyPrefix, keyGenerator, evict);
+        } else if (annotation instanceof EvictMulti){
+            EvictMulti evict = (EvictMulti) annotation;
+            return resolveCacheEvictMultiMetadata(method, annotation, keyPrefix, keyGenerator, evict);
         } else {
             throw new CacheBeanParsingException("Unsupported cache annotation : " + annotation);
         }
@@ -155,6 +158,24 @@ public class CacheResolver {
                 evict.condition(),
                 resolveValue(keyGenerator, evict.keyGenerator())
         );
+        metadata.setAfterInvocation(evict.afterInvocation());
+        return metadata;
+    }
+
+    private
+    static EvictionMetadata
+    resolveCacheEvictMultiMetadata(Method method, Annotation cacheAnnotation, String keyPrefix, String keyGenerator, EvictMulti evict) {
+        EvictionMetadata metadata = new EvictionMetadata();
+        resolveCommonMetadata(
+                metadata,
+                method,
+                cacheAnnotation,
+                keyPrefix,
+                evict.elementKey(),
+                evict.condition(),
+                resolveValue(keyGenerator, evict.keyGenerator())
+        );
+        metadata.setMultiple(true);
         metadata.setAfterInvocation(evict.afterInvocation());
         return metadata;
     }
