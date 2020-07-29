@@ -5,11 +5,11 @@
 - [介绍](#介绍)
 - [入门](#入门)
     - [依赖](#依赖)
-    - [注解的使用](#注解的使用)
-    - [代理service](#代理service)
+    - [注解](#注解)
+    - [开始使用](#开始使用)
     - [使用redis或caffeine缓存实现](#使用redis或caffeine缓存实现)
-    - [Spring配置](#Spring配置)
-    - [SpringBoot配置](#SpringBoot配置)
+    - [Spring](#Spring配置)
+    - [SpringBoot](#SpringBoot配置)
 
 # 介绍
 archer是一个完全基于方法注解的缓存框架，解除缓存与业务代码的耦合。额外支持多对象缓存和列表缓存，从而提高缓存命中率：
@@ -21,7 +21,7 @@ archer是一个完全基于方法注解的缓存框架，解除缓存与业务�
 - 基于Java（默认）、FastJson、Kryo、Hessian序列化方式
 - 支持缓存穿透、击穿保护
 - 组件高度可定制化
-- JetBrains IDEA® 插件[SpEL-support](./plugin/archer-plugin.zip)，支持注解属性提示
+- JetBrains IDEA® 插件[archer-plugin](./plugin/archer-plugin.zip)，支持注解属性提示
 - Spring及Spring Boot支持
 
 依赖：
@@ -45,7 +45,7 @@ archer是一个完全基于方法注解的缓存框架，解除缓存与业务�
     <version>${archer.version}</version>
 </dependency>
 ```
-## 注解的使用
+## 注解
 ### 对象缓存
 ```java
 interface UserService {
@@ -94,8 +94,22 @@ interface UserService {
                 condition = "1 = 1",
                 overwrite = false,
                 orderBy = "#result$each.age"
-        )
+    )
     List<User> getUsersByIdList(@MapTo("#result$each.id") List<Long> userIds);
+    
+    
+    @CacheMulti(elementKey = "'user:' + #userIds$each",
+                expiration = 7, expirationTimeUnit = TimeUnit.DAYS,
+                breakdownProtect = true, breakdownProtectTimeout = 300, breakdownProtectTimeUnit = TimeUnit.MILLISECONDS,
+                valueSerializer = "customValueSerializer",
+                keyGenerator = "customKeyGenerator",
+                condition = "1 = 1",
+                overwrite = false,
+                orderBy = "#result$each.age"
+    )
+    @HashKey("#result$each$value.id")
+    Map<Long,User> getUsersByIdList(@MapTo("#result$each.id") List<Long> userIds);
+
 }
 ```
 
@@ -105,7 +119,168 @@ interface UserService {
 
 ⚠️注意：
 
-``#result``表示返回结果，``#result$each``表示数组或者集合的每一个元素
+``#result``表示返回结果，``#result$each``表示返回结果数组或者集合的每一个元素
 
 
 ### 列表缓存
+```java
+interface UserService {
+
+    @CacheList(key = "'user:page:' + #pageId", elementKey = "'user:' + #result$each.id",
+                expiration = 7, expirationTimeUnit = TimeUnit.DAYS,
+                breakdownProtect = true, breakdownProtectTimeout = 300, breakdownProtectTimeUnit = TimeUnit.MILLISECONDS,
+                elementValueSerializer = "customValueSerializer",
+                keyGenerator = "customKeyGenerator",
+                elementKeyGenerator = "customElementKeyGenerator",
+                condition = "#pageId = 1",
+                overwrite = false
+    )
+    List<User> getPagingUsers(int pageId, int pageSize);
+}
+```
+
+``elementValueSerializer`` 自定义元素值序列化工具
+
+``elementKeyGenerator`` 自定义元素缓存key生成器，优先级高于``elementKey``
+
+## 开始使用
+
+### 使用默认配置
+```java
+    Archer.create("com.atpex.example").init().start(UserService.class);
+```
+
+### 自定义组件
+```java
+    Archer.enableMetrics();
+    Archer.serialization(Serialization.FAST_JSON);
+    Archer.create("com.atpex.example")
+          .addKeyGenerator("customKeyGenerator", new CustomKeyGenerator())
+          .addValueSerializer("customValueSerializer", new CustomValueSerializer())
+          .addStatsListener(new AllCacheEventListener())
+    .init().start(UserService.class);
+```
+
+## 使用redis或caffeine缓存实现
+默认缓存实现是HashMap，要使用redis或者caffeine，需要：
+### 依赖
+#### redis
+```xml
+<dependency>
+    <groupId>com.atpexgo</groupId>
+    <artifactId>archer-redis</artifactId>
+    <version>${archer.version}</version>
+</dependency>
+```
+#### caffeine
+```xml
+<dependency>
+    <groupId>com.atpexgo</groupId>
+    <artifactId>archer-caffeine</artifactId>
+    <version>${archer.version}</version>
+</dependency>
+```
+
+## Spring配置
+### 依赖
+```xml
+<dependency>
+    <groupId>com.atpexgo</groupId>
+    <artifactId>archer-spring</artifactId>
+    <version>${archer.version}</version>
+</dependency>
+```
+### xml配置
+引入命名空间
+```xml
+<beans 
+       xmlns:archer="http://www.atpex.com/schema/archer"
+       xsi:schemaLocation="
+       http://www.atpex.com/schema/archer
+       http://www.atpex.com/schema/archer.xsd"
+>
+</beans>
+```
+增加配置
+```xml
+<archer:enable base-package="com.atpex.example" serialization="HESSIAN" enable-metrics="true">
+    <archer:shard-list>
+        <bean class="com.atpex.archer.cache.redis.RedisShard">
+            <property name="database" value="6"/>
+        </bean>
+        <bean class="com.atpex.archer.cache.redis.RedisShard">
+            <property name="database" value="7"/>
+        </bean>
+        <bean class="com.atpex.archer.cache.redis.RedisShard">
+            <property name="database" value="8"/>
+        </bean>
+        <bean class="com.atpex.archer.cache.redis.RedisShard">
+            <property name="database" value="9"/>
+        </bean>
+    </archer:shard-list>
+</archer:enable>
+```
+#### 配置和含义
+``base-package`` 指定需要扫描的包路径
+
+``serialization`` 指定默认的序列化方式，默认是java序列化
+
+``enable-metrics`` 指定是否打开统计开关，默认打开，会发送各种统计事件
+
+``shard-list`` 缓存配置
+
+## SpringBoot配置
+### 依赖
+```xml
+<dependency>
+    <groupId>com.atpexgo</groupId>
+    <artifactId>archer-spring-boot-starter</artifactId>
+    <version>${archer.version}</version>
+</dependency>
+```
+### 启动类或者配置类
+```java
+@EnableWebMvc
+@EnableArcher(basePackages = BASE_PACKAGE,
+        enableMetrics = false, serialization = Serialization.FAST_JSON)
+@SpringBootApplication(scanBasePackages = BASE_PACKAGE)
+public class Application {
+
+    public static final String BASE_PACKAGE = "com.atpex.example";
+
+    public static void main(String[] args) {
+        SpringApplication application = new SpringApplication(Application.class);
+        application.setWebApplicationType(WebApplicationType.SERVLET);
+        application.run(args);
+    }
+}
+```
+### 缓存配置
+如果使用[redis](#redis)或者[caffeine](#caffeine)，支持properties配置
+```yaml
+archer:
+  redis:
+    shards:
+    - database: 0
+      host: localhost
+      port: 6379
+    - database: 2
+      host: localhost
+      port: 6379
+    connect-timeout: 400
+```
+
+也可以作为bean注入到spring
+```java
+@Configuration
+class CacheConfig{
+
+    @Bean
+    RedisShard shard(){
+        RedisShard redisShard = new RedisShar();
+        redisShard.setHost("redis.host");
+        redisShard.setPort(6505);
+        return redisShard;
+    }   
+}
+```
