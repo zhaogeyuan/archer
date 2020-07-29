@@ -1,6 +1,5 @@
-![logo](./doc/img/archer_logo_200.png)
 
-![version](https://img.shields.io/badge/version-1.0-ff69b4) 
+#![logo](./doc/img/archer_150.png) Archer ![version](https://img.shields.io/badge/version-1.0-ff69b4) 
 
 - [介绍](#介绍)
 - [入门](#入门)
@@ -28,13 +27,15 @@ archer是一个完全基于方法注解的缓存框架，解除缓存与业务�
 
 ![jdk.version](https://img.shields.io/badge/Jdk-1.8%2B-ff69b4) 
 
-![spring.version](https://img.shields.io/badge/Spring-4.0.0.RELEASE%2B-green) (Optional)
+可选：
 
-![spring.boot.version](https://img.shields.io/badge/Spring.boot-1.0.0.RELEASE%2B-blue) (Optional)
+![spring.version](https://img.shields.io/badge/Spring-4.0.0.RELEASE%2B-green)
 
-![jedis.version](https://img.shields.io/badge/Jedis-2.9.0%2B-red) (Optional)
+![spring.boot.version](https://img.shields.io/badge/Spring.boot-1.0.0.RELEASE%2B-blue)
 
-![caffeine.version](https://img.shields.io/badge/Caffeine-2.8.4%2B-blueviolet) (Optional)
+![jedis.version](https://img.shields.io/badge/Jedis-2.9.0%2B-red)
+
+![caffeine.version](https://img.shields.io/badge/Caffeine-2.8.4%2B-blueviolet)
 
 # 入门
 ## 依赖
