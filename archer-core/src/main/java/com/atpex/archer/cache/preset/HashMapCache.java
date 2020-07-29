@@ -81,4 +81,13 @@ public class HashMapCache implements Cache {
         return true;
     }
 
+    @Override
+    public boolean removeAll(Collection<String> keys, CacheEventCollector collector) {
+        for (String key : keys) {
+            map.remove(key);
+            collector.collect(new CacheAccessEvent());
+        }
+        return false;
+    }
+
 }

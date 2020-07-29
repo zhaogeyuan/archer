@@ -61,6 +61,17 @@ public class Controller {
         return userService.getUsersWithMultipleParameters("testest", userIds);
     }
 
+    @RequestMapping(value = "/deleteUsers", method = RequestMethod.GET)
+    void deleteUser() {
+        List<Long> userIds = new ArrayList<>();
+        userIds.add(8L);
+        userIds.add(107L);
+        userIds.add(203L);
+        userIds.add(404L);
+        userIds.add(505L);
+        userService.deleteUsers(userIds);
+    }
+
     @RequestMapping(value = "/getUser", method = RequestMethod.GET)
     User getUser(Long userId) {
         return userService.getUser(userId);

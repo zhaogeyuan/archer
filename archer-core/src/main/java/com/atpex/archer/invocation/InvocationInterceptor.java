@@ -245,9 +245,9 @@ public class InvocationInterceptor {
         List<Supplier<?>> operations = metadata.getAfterInvocation() ? evictionContext.postOperations : evictionContext.preOperations;
         for (CacheOperation cacheOperation : cacheOperations) {
             AbstractProcessor processor = management.getProcessor(cacheOperation);
-
-            List<InvocationContext> contexts = new ArrayList<>();
-            if(metadata.getMultiple()) {
+            Supplier eviction = null;
+            if (metadata.getMultiple()) {
+                List<InvocationContext> contexts = new ArrayList<>();
                 List<Object[]> newArgs = ReflectionUtil.flattenArgs(args);
                 for (Object[] newArg : newArgs) {
                     InvocationContext context = new InvocationContext();
@@ -256,26 +256,31 @@ public class InvocationInterceptor {
                     context.setArgs(newArg);
                     contexts.add(context);
                 }
-
-            }else {
+                eviction = () -> {
+                    try {
+                        logger.debug("Delete contexts: {}", contexts);
+                        processor.deleteAll(contexts, cacheOperation);
+                    } finally {
+                    }
+                    return null;
+                };
+            } else {
                 InvocationContext context = new InvocationContext();
                 context.setTarget(target);
                 context.setMethod(method);
                 context.setArgs(args);
-                contexts.add(context);
-            }
-
-            for (InvocationContext context : contexts) {
-                // always delete list cache first, because complex cache dose not just delete key, also need cache key to find some other records
-                push(operations, () -> {
+                eviction = () -> {
                     try {
                         logger.debug("Delete context: {}", context);
                         processor.delete(context, cacheOperation);
                     } finally {
                     }
                     return null;
-                }, cacheOperation instanceof ListCacheOperation);
+                };
             }
+
+            // always delete list cache first, because complex cache may dose not just delete key, also need cache key to find some other records
+            push(operations, eviction, cacheOperation instanceof ListCacheOperation);
         }
         return evictionContext;
     }

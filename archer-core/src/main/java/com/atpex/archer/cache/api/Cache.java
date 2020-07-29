@@ -33,6 +33,8 @@ public interface Cache {
 
     boolean remove(String key, CacheEventCollector collector);
 
+    boolean removeAll(Collection<String> keys, CacheEventCollector collector);
+
     default Entry wrap(String key, byte[] value, long ttl) {
         return new DefaultEntry(key, value, ttl);
     }

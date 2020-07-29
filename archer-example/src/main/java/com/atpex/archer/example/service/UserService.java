@@ -67,11 +67,12 @@ public interface UserService {
      *
      * 多参数
      *
+     * @param flag
      * @param userIds
      * @return
      */
     @CacheMulti(elementKey = "#userIds$each")
-    List<User> getUsersWithMultipleParameters(String flag,@MapTo("#result$each.id") List<Long> userIds);
+    List<User> getUsersWithMultipleParameters(String flag, @MapTo("#result$each.id") List<Long> userIds);
 
     // 淘汰缓存
 

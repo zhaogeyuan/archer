@@ -71,22 +71,19 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
     @Override
     public void renameUser(Long userId, String userName) {
         User user = userRepository.queryUser(userId);
         if(user != null) {
-            CacheContext.evictList("archer:example:user:list:by_name:" + user.getName());
+            CacheContext.evictList("archer:example:user:page:1");
             userRepository.renameUser(userId, userName);
         }
     }
-
 
     @Override
     public void deleteUser(Long userId) {
         User user = userRepository.queryUser(userId);
         if(user != null) {
-            CacheContext.evictList("archer:example:user:list:by_name:" + user.getName());
             userRepository.deleteUser(userId);
         }
     }

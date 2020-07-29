@@ -6,6 +6,11 @@
 - [入门](#入门)
     - [依赖](#依赖)
     - [注解](#注解)
+        -[对象缓存](#对象缓存)
+        -[多对象缓存](#多对象缓存)
+        -[列表缓存](#列表缓存)
+        -[缓存淘汰](#缓存淘汰)
+        -[全局属性](#全局属性)
     - [开始使用](#开始使用)
     - [使用redis或caffeine缓存实现](#使用redis或caffeine缓存实现)
     - [Spring](#Spring配置)
@@ -91,7 +96,7 @@ interface UserService {
                 breakdownProtect = true, breakdownProtectTimeout = 300, breakdownProtectTimeUnit = TimeUnit.MILLISECONDS,
                 valueSerializer = "customValueSerializer",
                 keyGenerator = "customKeyGenerator",
-                condition = "1 = 1",
+                condition = "1 == 1",
                 overwrite = false,
                 orderBy = "#result$each.age"
     )
@@ -103,7 +108,7 @@ interface UserService {
                 breakdownProtect = true, breakdownProtectTimeout = 300, breakdownProtectTimeUnit = TimeUnit.MILLISECONDS,
                 valueSerializer = "customValueSerializer",
                 keyGenerator = "customKeyGenerator",
-                condition = "1 = 1",
+                condition = "1 == 1",
                 overwrite = false,
                 orderBy = "#result$each.age"
     )
@@ -132,7 +137,7 @@ interface UserService {
                 elementValueSerializer = "customValueSerializer",
                 keyGenerator = "customKeyGenerator",
                 elementKeyGenerator = "customElementKeyGenerator",
-                condition = "#pageId = 1",
+                condition = "#pageId == 1",
                 overwrite = false
     )
     List<User> getPagingUsers(int pageId, int pageSize);
@@ -142,6 +147,37 @@ interface UserService {
 ``elementValueSerializer`` 自定义元素值序列化工具
 
 ``elementKeyGenerator`` 自定义元素缓存key生成器，优先级高于``elementKey``
+
+### 缓存淘汰
+```java
+interface UserService {
+
+    @Evict(key = "#user.id", 
+            keyGenerator = "customKeyGenerator", 
+            afterInvocation = true, condition = "1==1")
+    void deleteUser(User user);
+
+    @EvictMulti(elementKey = "#userIds$each", 
+            keyGenerator = "customKeyGenerator", 
+            afterInvocation = true, condition = "1==1")
+    void deleteUsers(List<Long> userIds);
+
+}
+```
+
+``afterInvocation`` 是否在方法执行后执行
+
+### 全局属性
+```java
+@Cacheable(prefix = "archer:example:user",
+        valueSerializer = "customValueSerializer", 
+        keyGenerator = "customKeyGenerator")
+interface UserService {
+}
+```
+
+``prefix`` 声明当前方法中的所有key的前缀
+
 
 ## 开始使用
 
