@@ -72,7 +72,6 @@ public @interface CacheList {
      */
     String elementValueSerializer() default "";
 
-
     /**
      * Custom key generator name
      *

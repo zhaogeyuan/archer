@@ -7,32 +7,109 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Cache operation
+ * Cache
  *
  * @author atpexgo.wu
  * @since 1.0
  */
 public interface Cache {
 
+    /**
+     * Initialize cache with {@link CacheShard}
+     * @param shard
+     */
     default void init(CacheShard shard) {
     }
 
+    /**
+     * True if the specified key already cached
+     *
+     * @param key
+     * @param collector
+     * @return
+     */
     boolean containsKey(String key, CacheEventCollector collector);
 
+    /**
+     * Get entry cached with the specified key, return null if cache miss
+     *
+     * @param key
+     * @param collector
+     * @return
+     */
     Entry get(String key, CacheEventCollector collector);
 
+    /**
+     * Batch version for {@link #get(String, CacheEventCollector)}
+     *
+     * @param keys
+     * @param collector
+     * @return
+     */
     Map<String, Entry> getAll(Collection<String> keys, CacheEventCollector collector);
 
+    /**
+     * Cache entry with the specified key, <br>
+     * replace the old one if already exists
+     *
+     * @param key
+     * @param value
+     * @param collector
+     */
     void put(String key, Entry value, CacheEventCollector collector);
 
+    /**
+     * Batch version for {@link #put(String, Entry, CacheEventCollector)}
+     *
+     * @param map
+     * @param collector
+     */
     void putAll(Map<String, Entry> map, CacheEventCollector collector);
 
+    /**
+     * Cache entry with the specified key, <br>
+     * keep the old one if already exists
+     *
+     * @param key
+     * @param value
+     * @param collector
+     */
     void putIfAbsent(String key, Entry value, CacheEventCollector collector);
 
+    /**
+     * Batch version for {@link #put(String, Entry, CacheEventCollector)}
+     *
+     * @param map
+     * @param collector
+     */
     void putAllIfAbsent(Map<String, Entry> map, CacheEventCollector collector);
 
+    /**
+     * Remove entry with the specified key from cache
+     *
+     * @param key
+     * @param collector
+     * @return
+     */
     boolean remove(String key, CacheEventCollector collector);
 
+    /**
+     * Batch version for {@link #remove(String, CacheEventCollector)}
+     *
+     * @param keys
+     * @param collector
+     * @return
+     */
+    boolean removeAll(Collection<String> keys, CacheEventCollector collector);
+
+    /**
+     * Wrap key,value,ttl to Entry object
+     *
+     * @param key
+     * @param value
+     * @param ttl
+     * @return
+     */
     default Entry wrap(String key, byte[] value, long ttl) {
         return new DefaultEntry(key, value, ttl);
     }

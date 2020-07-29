@@ -169,10 +169,10 @@ public class ObjectProcessor<V> extends AbstractProcessor<ObjectCacheOperation<V
             for (OrderedHolder<V> holder : holders) {
                 reordered.put(holder.key, holder.object);
             }
-            return reordered;
+            combinedOrdered = reordered;
         }
 
-        logger.debug("{} entity(ies) missed, but {} entity(ies) hit and loaded at once", missCount, keys.size() - missCount);
+        logger.debug("{} missed/{} hit", missCount, keys.size() - missCount);
         return combinedOrdered;
     }
 

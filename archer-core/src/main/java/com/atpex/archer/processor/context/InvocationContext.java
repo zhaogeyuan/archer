@@ -70,4 +70,14 @@ public class InvocationContext {
         result = 31 * result + Arrays.hashCode(args);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "InvocationContext{" +
+                "target=" + target +
+                ", method=" + method +
+                ", args=" + Arrays.toString(args) +
+                ", methodInvoker=" + methodInvoker +
+                '}';
+    }
 }

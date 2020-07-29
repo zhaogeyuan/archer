@@ -87,22 +87,22 @@ public class Archer {
         return this;
     }
 
-    public Archer addStatsListener(CacheStatsListener metricsListener) {
-        this.statsListeners.add(metricsListener);
+    public Archer addStatsListener(CacheStatsListener statsListener) {
+        this.statsListeners.add(statsListener);
         return this;
     }
 
-    public Archer setOperationConfigs(List<? extends CacheShard> configs) {
+    public Archer setCacheConfigs(List<? extends CacheShard> configs) {
         cacheShards.addAll(configs);
         return this;
     }
 
-    public Archer setCacheOperationInitializationProcessor(CacheInitializer processor) {
-        this.cacheInitializer = processor;
+    public Archer setCacheInitializer(CacheInitializer initializer) {
+        this.cacheInitializer = initializer;
         return this;
     }
 
-    public Archer addOperationConfig(CacheShard shard) {
+    public Archer addCacheConfig(CacheShard shard) {
         cacheShards.add(shard);
         return this;
     }
@@ -155,7 +155,7 @@ public class Archer {
     }
 
 
-    private void cacheable(Class<?> service, String signature, Method declaredMethod) {
+    private void cache(Class<?> service, String signature, Method declaredMethod) {
         if (cacheManager.getMethodSignatureToOperationSourceName().containsKey(signature)) {
             return;
         }
@@ -203,14 +203,14 @@ public class Archer {
                 cacheOperation.setCacheEventCollector(cacheEventCollector);
 
                 cacheOperation.initialized();
-                String name = "cacheable" + UUID.randomUUID().toString();
+                String name = "cache" + UUID.randomUUID().toString();
                 cacheManager.getCacheOperationMap().put(name, cacheOperation);
                 cacheManager.getMethodSignatureToOperationSourceName().computeIfAbsent(signature, s -> new ArrayList<>()).add(name);
             }
         }
     }
 
-    private void listCacheable(Class<?> service, String signature, Method declaredMethod) {
+    private void listCache(Class<?> service, String signature, Method declaredMethod) {
         if (cacheManager.getMethodSignatureToOperationSourceName().containsKey(signature)) {
             return;
         }
@@ -252,7 +252,7 @@ public class Archer {
                 listCacheOperation.setCacheEventCollector(cacheEventCollector);
 
                 listCacheOperation.initialized();
-                String name = "listCacheable" + UUID.randomUUID().toString();
+                String name = "listCache" + UUID.randomUUID().toString();
                 cacheManager.getCacheOperationMap().put(name, listCacheOperation);
                 cacheManager.getMethodSignatureToOperationSourceName().computeIfAbsent(signature, s -> new ArrayList<>()).add(name);
             }
@@ -307,8 +307,8 @@ public class Archer {
             for (Method declaredMethod : declaredMethods) {
                 String signature = ReflectionUtil.getSignatureForCache(declaredMethod);
                 archer.eviction(instance.getClass(), signature, declaredMethod);
-                archer.cacheable(instance.getClass(), signature, declaredMethod);
-                archer.listCacheable(instance.getClass(), signature, declaredMethod);
+                archer.cache(instance.getClass(), signature, declaredMethod);
+                archer.listCache(instance.getClass(), signature, declaredMethod);
             }
             if (serviceType.isInterface()) {
                 // JDK proxy

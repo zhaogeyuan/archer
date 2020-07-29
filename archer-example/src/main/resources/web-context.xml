@@ -1,0 +1,69 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:archer="http://www.atpex.com/schema/archer"
+       xsi:schemaLocation="
+       http://www.atpex.com/schema/archer
+       http://www.atpex.com/schema/archer.xsd
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	   http://www.springframework.org/schema/util
+	   http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <context:component-scan base-package="com.atpex.archer.example.*"/>
+
+
+    <mvc:default-servlet-handler/>
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="false">
+            <bean
+                    class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+                <property name="supportedMediaTypes">
+                    <util:list>
+                        <value>application/json;charset=UTF-8</value>
+                    </util:list>
+                </property>
+                <property name="writeAcceptCharset" value="false"/>
+            </bean>
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <archer:enable base-package="com.atpex.archer.example" serialization="HESSIAN" enable-metrics="true">
+        <archer:shard-list>
+            <bean class="com.atpex.archer.cache.redis.RedisShard">
+                <property name="database" value="6"/>
+            </bean>
+            <bean class="com.atpex.archer.cache.redis.RedisShard">
+                <property name="database" value="7"/>
+            </bean>
+            <bean class="com.atpex.archer.cache.redis.RedisShard">
+                <property name="database" value="8"/>
+            </bean>
+            <bean class="com.atpex.archer.cache.redis.RedisShard">
+                <property name="database" value="9"/>
+            </bean>
+        </archer:shard-list>
+    </archer:enable>
+
+
+    <!-- swagger静态文件路径 -->
+    <!--<mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/" />-->
+    <!--<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/" />-->
+
+    <!-- swagger docket-->
+    <!--  <bean class="com.ximalaya.chaos.web.util.SwaggerConfig"/>-->
+</beans>

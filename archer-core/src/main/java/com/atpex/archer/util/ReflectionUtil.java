@@ -45,7 +45,7 @@ public class ReflectionUtil extends Reflections {
 
     @SuppressWarnings("unchecked")
     private static final Class<Annotation>[] EVICT_CACHE_METHOD_ANNOTATIONS = new Class[]{
-            Evict.class, Evicts.class
+            Evict.class, Evicts.class, EvictMulti.class, EvictMultis.class
     };
 
 
@@ -82,7 +82,7 @@ public class ReflectionUtil extends Reflections {
     /**
      * method signature -> interface or abstract method
      */
-    private static final Map<String, Method> ABSTRACT_ANNOTATED_METHOD_CLASS = new HashMap<>();
+    private static final Map<String, List<Method>> ABSTRACT_ANNOTATED_METHOD_CLASS = new HashMap<>();
 
     /**
      * method signature -> method
@@ -169,8 +169,16 @@ public class ReflectionUtil extends Reflections {
                         annotations.add(annotation);
                         return annotations;
                     });
+
                     if (declaringClass.isInterface() || Modifier.isAbstract(declaringClass.getModifiers())) {
-                        ABSTRACT_ANNOTATED_METHOD_CLASS.put(signature, method);
+                        signature = getSignature(method, false, true);
+                        ABSTRACT_ANNOTATED_METHOD_CLASS.compute(signature, (sig, methods) -> {
+                            if (methods == null) {
+                                methods = new ArrayList<>();
+                            }
+                            methods.add(method);
+                            return methods;
+                        });
                     } else {
                         ANNOTATED_METHOD_CLASS.put(signature, method);
                     }
@@ -252,9 +260,11 @@ public class ReflectionUtil extends Reflections {
         String signature = getSignature(method, true, true);
         if (!ANNOTATED_METHOD_CLASS.containsKey(signature)) {
             String sig = getSignature(method, false, true);
-            Method cachedMethod = ABSTRACT_ANNOTATED_METHOD_CLASS.getOrDefault(sig, null);
-            if (cachedMethod != null && cachedMethod.getDeclaringClass().isAssignableFrom(declaringClass)) {
-                return sig;
+            List<Method> cachedMethods = ABSTRACT_ANNOTATED_METHOD_CLASS.getOrDefault(sig, new ArrayList<>());
+            for (Method cachedMethod : cachedMethods) {
+                if (cachedMethod != null && cachedMethod.getDeclaringClass().isAssignableFrom(declaringClass)) {
+                    return getSignature(cachedMethod, true, true);
+                }
             }
         }
         return signature;

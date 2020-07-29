@@ -1,7 +1,10 @@
 package com.atpex.archer.test;
 
 import com.atpex.archer.Archer;
+import com.atpex.archer.constants.Serialization;
 import com.atpex.archer.test.components.AllCacheEventListener;
+import com.atpex.archer.test.components.CustomKeyGenerator;
+import com.atpex.archer.test.components.CustomValueSerializer;
 import com.atpex.archer.test.model.User;
 import com.atpex.archer.test.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -41,7 +44,10 @@ public class ArcherTest {
     @Test
     public void testCacheMulti(){
         Archer.enableMetrics();
+        Archer.serialization(Serialization.FAST_JSON);
         UserService userService = Archer.create(ArcherTest.class.getPackage().getName())
+//                .addKeyGenerator("customKeyGenerator", new CustomKeyGenerator())
+//                .addValueSerializer("customValueSerializer", new CustomValueSerializer())
                 .addStatsListener(new AllCacheEventListener()).init().start(UserService.class);
 
         User userById = userService.getUserById(2L);

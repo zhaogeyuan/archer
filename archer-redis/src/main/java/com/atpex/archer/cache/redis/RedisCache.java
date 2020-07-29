@@ -14,10 +14,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -151,7 +148,18 @@ public final class RedisCache implements Cache {
 
     @Override
     public boolean remove(String key, CacheEventCollector collector) {
+        collector.collect(new CacheAccessEvent());
         return autoClose(jedis -> jedis.del(keySerializer.serialize(key)) != 0);
+    }
+
+    @Override
+    public boolean removeAll(Collection<String> keys, CacheEventCollector collector) {
+        List<byte[]> keysInBytes = new ArrayList<>();
+        for (String key : keys) {
+            collector.collect(new CacheAccessEvent());
+            keysInBytes.add(keySerializer.serialize(key));
+        }
+        return autoClose(jedis -> jedis.del(keysInBytes.toArray(new byte[0][])) != 0);
     }
 
     private <R> R autoClose(Function<Jedis, R> function) {

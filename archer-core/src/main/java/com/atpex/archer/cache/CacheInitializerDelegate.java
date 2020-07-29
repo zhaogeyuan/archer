@@ -18,10 +18,10 @@ import java.util.TreeMap;
  */
 public class CacheInitializerDelegate implements CacheInitializer, Component {
 
-    private TreeMap<Integer, CacheInitializer> cacheInitializerTree;
+    private final TreeMap<Integer, CacheInitializer> cacheInitializerTree;
 
-    private static final String INTERNAL_REDIS_INITIALIZER_CLASS = "com.atpex.archer.cache.internal.RedisCacheInitializer";
-    private static final String INTERNAL_CAFFEINE_INITIALIZER_CLASS = "com.atpex.archer.cache.internal.CaffeineCacheInitializer";
+    private static final String INTERNAL_REDIS_INITIALIZER_CLASS = "com.atpex.archer.cache.redis.RedisCacheInitializer";
+    private static final String INTERNAL_CAFFEINE_INITIALIZER_CLASS = "com.atpex.archer.cache.caffeine.CaffeineCacheInitializer";
 
     public CacheInitializerDelegate() {
         cacheInitializerTree = new TreeMap<>();

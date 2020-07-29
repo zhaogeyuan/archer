@@ -40,7 +40,6 @@ public @interface Evict {
      */
     boolean afterInvocation() default false;
 
-
     /**
      * Cache condition
      * <p>

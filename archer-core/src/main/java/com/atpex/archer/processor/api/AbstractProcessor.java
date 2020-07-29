@@ -16,6 +16,7 @@ import com.atpex.archer.stats.event.CacheBreakdownProtectedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,15 @@ public abstract class AbstractProcessor<C extends CacheOperation<?, V>, V> imple
     @Override
     public void delete(InvocationContext context, C cacheOperation) {
         cache.remove(generateCacheKey(context, cacheOperation.getMetadata()), cacheOperation.getCacheEventCollector());
+    }
+
+    @Override
+    public void deleteAll(List<InvocationContext> contextList, C cacheOperation) {
+        List<String> keys = new ArrayList<>();
+        for (InvocationContext context : contextList) {
+            keys.add(generateCacheKey(context, cacheOperation.getMetadata()));
+        }
+        cache.removeAll(keys, cacheOperation.getCacheEventCollector());
     }
 
     /**

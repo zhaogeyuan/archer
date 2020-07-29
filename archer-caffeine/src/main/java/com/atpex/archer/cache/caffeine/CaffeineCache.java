@@ -87,6 +87,13 @@ public final class CaffeineCache extends HashMapCache {
     }
 
     @Override
+    public boolean removeAll(Collection<String> keys, CacheEventCollector collector) {
+        cache.invalidateAll(keys);
+        collector.collect(new CacheAccessEvent());
+        return false;
+    }
+
+    @Override
     public void putAllIfAbsent(Map<String, Entry> map, CacheEventCollector collector) {
         map.forEach((k, e) -> putIfAbsent(k, e, collector));
     }

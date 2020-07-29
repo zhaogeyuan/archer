@@ -53,7 +53,7 @@ public final class SpringShardingCacheConfigure extends ShardingCacheConfigure i
             synchronized (this) {
                 if (!initialized) {
                     try {
-                        Class<?> propertiesClass = Class.forName("com.himalaya.service.cacheable.autoconfiguration.properties.CacheableProperties");
+                        Class<?> propertiesClass = Class.forName("com.atpex.archer.spring.autoconfigure.properties.CacheProperties");
                         Map<String, ?> beans = applicationContext.getBeansOfType(propertiesClass);
                         if (beans.size() > 0) {
                             Object properties = beans.values().iterator().next();

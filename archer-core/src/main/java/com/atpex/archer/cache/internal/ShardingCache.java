@@ -3,10 +3,10 @@ package com.atpex.archer.cache.internal;
 
 import com.atpex.archer.cache.api.Cache;
 import com.atpex.archer.cache.api.ShardingConfigure;
+import com.atpex.archer.stats.api.CacheEventCollector;
 import com.atpex.archer.stats.event.CacheAccessEvent;
 import com.atpex.archer.stats.event.CachePositivelyEvictEvent;
 import com.atpex.archer.stats.event.CacheTimeElapsingEvent;
-import com.atpex.archer.stats.api.CacheEventCollector;
 import com.atpex.archer.util.CommonUtils;
 
 import java.util.*;
@@ -136,6 +136,34 @@ public class ShardingCache implements Cache {
         CacheTimeElapsingEvent cacheTimeElapsingEvent = new CacheTimeElapsingEvent();
         CachePositivelyEvictEvent cachePositivelyEvictEvent = new CachePositivelyEvictEvent();
         boolean remove = shardingConfigure.sharding(key).remove(key, collector);
+        cacheTimeElapsingEvent.done();
+        collector.collect(cacheTimeElapsingEvent);
+        collector.collect(cachePositivelyEvictEvent);
+        return remove;
+    }
+
+    @Override
+    public boolean removeAll(Collection<String> keys, CacheEventCollector collector) {
+        CacheTimeElapsingEvent cacheTimeElapsingEvent = new CacheTimeElapsingEvent();
+        CachePositivelyEvictEvent cachePositivelyEvictEvent = new CachePositivelyEvictEvent();
+        boolean remove = true;
+        Map<Cache, List<String>> shardingKeys = new HashMap<>();
+        for (String key : keys) {
+            Cache cache = shardingConfigure.sharding(key);
+            shardingKeys.compute(cache, (c, ks) -> {
+                if (ks == null) {
+                    ks = new ArrayList<>();
+                }
+                ks.add(key);
+                return ks;
+            });
+        }
+
+        for (Map.Entry<Cache, List<String>> cacheEntry : shardingKeys.entrySet()) {
+            Cache cache = cacheEntry.getKey();
+            List<String> keysInOneShard = cacheEntry.getValue();
+            remove = remove && cache.removeAll(keysInOneShard, collector);
+        }
         cacheTimeElapsingEvent.done();
         collector.collect(cacheTimeElapsingEvent);
         collector.collect(cachePositivelyEvictEvent);
