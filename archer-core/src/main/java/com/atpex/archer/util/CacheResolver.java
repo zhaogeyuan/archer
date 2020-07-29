@@ -280,7 +280,8 @@ public class CacheResolver {
                 }
                 Object[] mappedArgs = new Object[indexedMapTo.size()];
                 for (int i1 = 0; i1 < indexedMapToEntries.size(); i1++) {
-                    MapTo mapTo = (MapTo) indexedMapToEntries.get(i1).getValue();
+                    Annotation paramAnnotation = indexedMapToEntries.get(i1).getValue();
+                    MapTo mapTo = (MapTo) paramAnnotation;
                     Object arg = new SpringElUtil.SpringELEvaluationContext(mapTo.value()).addVar("result$each", element).getValue();
                     mappedArgs[i1] = arg;
                 }

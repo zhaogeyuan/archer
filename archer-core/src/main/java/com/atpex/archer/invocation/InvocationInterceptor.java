@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.atpex.archer.CacheManager;
+import com.atpex.archer.annotation.extra.HashKey;
 import com.atpex.archer.exception.FallbackException;
 import com.atpex.archer.metadata.EvictionMetadata;
 import com.atpex.archer.metadata.ObjectCacheMetadata;
@@ -171,6 +172,12 @@ public class InvocationInterceptor {
                         values[i] = all.get(keys[i]);
                     }
                 }
+
+                Map hash = toHash(Arrays.asList(values), target, method, args);
+                if (hash != null) {
+                    return hash;
+                }
+
                 ReflectionUtil.makeAccessible(values.getClass().getComponentType());
                 return JSON.parseObject(JSON.toJSONString(values), method.getGenericReturnType(), new ParserConfig(true), Feature.SupportNonPublicField);
             } catch (FallbackException fallbackException) {
@@ -212,6 +219,12 @@ public class InvocationInterceptor {
                     if (componentOrArgumentType != null) {
                         ReflectionUtil.makeAccessible(componentOrArgumentType);
                     }
+
+                    Map hash = toHash((Collection) result, target, method, args);
+                    if (hash != null) {
+                        return hash;
+                    }
+
                     result = JSON.parseObject(JSON.toJSONString(result), method.getGenericReturnType(), new ParserConfig(true), Feature.SupportNonPublicField);
                 }
                 return result;
@@ -221,6 +234,33 @@ public class InvocationInterceptor {
             }
         }, false);
         return acceptationContext;
+    }
+
+
+    private Map toHash(Iterable result, Object target, Method method, Object[] args) {
+        List annotations = ReflectionUtil.getCacheAnnotations(method, HashKey.class);
+        if (CommonUtils.isNotEmpty(annotations)) {
+            HashKey hashKey = (HashKey) annotations.get(0);
+            Map resultHash = new HashMap();
+            SpringElUtil.SpringELEvaluationContext springELEvaluationContext = SpringElUtil.parse(hashKey.value());
+            for (Object o : result) {
+                if (o == null) {
+                    continue;
+                }
+                Object key = springELEvaluationContext.setMethodInvocationContext(
+                        target,
+                        method,
+                        args,
+                        result
+                ).addVar("result$each", o).getValue();
+
+                if (key != null) {
+                    resultHash.put(key, o);
+                }
+            }
+            return resultHash;
+        }
+        return null;
     }
 
     /**

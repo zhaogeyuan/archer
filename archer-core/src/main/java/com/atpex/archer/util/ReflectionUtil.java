@@ -2,6 +2,7 @@ package com.atpex.archer.util;
 
 import com.alibaba.fastjson.JSON;
 import com.atpex.archer.annotation.*;
+import com.atpex.archer.annotation.extra.HashKey;
 import com.atpex.archer.annotation.extra.MapTo;
 import org.reflections.Configuration;
 import org.reflections.Reflections;
@@ -48,10 +49,13 @@ public class ReflectionUtil extends Reflections {
             Evict.class, Evicts.class, EvictMulti.class, EvictMultis.class
     };
 
+    private static final Class<Annotation>[] EXTRA_CACHE_METHOD_ANNOTATIONS = new Class[]{
+            HashKey.class
+    };
 
     @SuppressWarnings("unchecked")
     private static final Class<Annotation>[][] CACHE_METHOD_ANNOTATIONS = new Class[][]{
-            OBJECT_CACHE_METHOD_ANNOTATIONS, LIST_CACHE_METHOD_ANNOTATIONS, EVICT_CACHE_METHOD_ANNOTATIONS
+            OBJECT_CACHE_METHOD_ANNOTATIONS, LIST_CACHE_METHOD_ANNOTATIONS, EVICT_CACHE_METHOD_ANNOTATIONS, EXTRA_CACHE_METHOD_ANNOTATIONS
     };
 
     @SuppressWarnings("unchecked")
@@ -139,7 +143,7 @@ public class ReflectionUtil extends Reflections {
 
     private static void init() {
 
-        // init types
+        // scan types
         for (Class<Annotation> annotationClass : CACHE_CLASS_ANNOTATIONS) {
             Set<Class<?>> annotatedTypes = reflections.getTypesAnnotatedWith(annotationClass);
             for (Class type : annotatedTypes) {
@@ -154,7 +158,7 @@ public class ReflectionUtil extends Reflections {
             }
         }
 
-        // init methods
+        // scan methods
         for (Class<Annotation>[] cacheMethodAnnotations : CACHE_METHOD_ANNOTATIONS) {
             for (Class<Annotation> annotationClass : cacheMethodAnnotations) {
                 Set<Method> annotatedMethods = reflections.getMethodsAnnotatedWith(annotationClass);
@@ -197,7 +201,7 @@ public class ReflectionUtil extends Reflections {
             }
         }
 
-        // init method parameters
+        // scan method parameters
         for (Class<Annotation> annotationClass : CACHE_METHOD_PARAMETER_ANNOTATIONS) {
             Set<Method> annotatedMethods = reflections.getMethodsWithAnyParamAnnotated(annotationClass);
             for (Method method : annotatedMethods) {
@@ -289,8 +293,7 @@ public class ReflectionUtil extends Reflections {
      * @return
      */
     public static <T extends Annotation> T getCacheAnnotation(Class clazz, Class<T> annotationType) {
-        String signature = getSignatureForCache(clazz);
-        Annotation annotation = TYPE_ANNOTATIONS.getOrDefault(signature, null);
+        Annotation annotation = getCacheAnnotation(clazz);
         if (annotation != null && annotation.annotationType().getName().equals(annotationType.getName())) {
             return (T) annotation;
         }
@@ -316,8 +319,7 @@ public class ReflectionUtil extends Reflections {
      * @return
      */
     public static List getCacheAnnotations(Method method, Class... annotationTypes) {
-        String signature = getSignatureForCache(method);
-        List<Annotation> annotations = METHOD_ANNOTATIONS.getOrDefault(signature, new ArrayList<>());
+        List<Annotation> annotations = getCacheAnnotations(method);
         List greppedAnnotations = new ArrayList<>();
         for (Annotation annotation : annotations) {
             for (Class annotationType : annotationTypes) {
@@ -338,8 +340,7 @@ public class ReflectionUtil extends Reflections {
      */
     public static List<Annotation> getRepeatableCacheAnnotations(Method method) {
         List<Annotation> repeatableAnnotations = new ArrayList<>();
-        String signature = getSignatureForCache(method);
-        List<Annotation> annotations = METHOD_ANNOTATIONS.getOrDefault(signature, new ArrayList<>());
+        List<Annotation> annotations = getCacheAnnotations(method);
         for (Annotation annotation : annotations) {
             if (annotation != null) {
                 String containedFieldGetter = REPEATABLE_ANNOTATIONS_CONTAINER_METHOD.getOrDefault(annotation.annotationType(), null);
@@ -417,7 +418,14 @@ public class ReflectionUtil extends Reflections {
      * @return
      */
     public static boolean findAnyCacheAnnotation(Method method) {
-        return getCacheAnnotations(method).size() > 0;
+        return getCacheAnnotations(method).stream().anyMatch(annotation -> {
+            for (Class<Annotation> extraCacheMethodAnnotationClass : EXTRA_CACHE_METHOD_ANNOTATIONS) {
+                if (extraCacheMethodAnnotationClass.getName().equals(annotation.annotationType().getName())) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 
     // todo

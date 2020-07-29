@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 /**
  * Support {@link java.util.Map} result for {@link CacheMulti} and {@link CacheList}
  * <p>
- *
+ * Specify the hash key for result
  *
  * @author atpexgo
  * @see CacheMulti
@@ -26,6 +26,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface HashKey {
 
     /**
+     * Hash key
      * Support Spring Expression Language (SpEL)
      */
     String value();
