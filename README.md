@@ -46,7 +46,7 @@ archer是一个完全基于方法注解的缓存框架，解除缓存与业务�
 ## 依赖
 ```xml
 <dependency>
-    <groupId>com.atpexgo</groupId>
+    <groupId>com.github.attt</groupId>
     <artifactId>archer-core</artifactId>
     <version>${archer.version}</version>
 </dependency>
@@ -184,14 +184,14 @@ interface UserService {
 
 ### 使用默认配置
 ```java
-    Archer.create("com.atpex.example").init().start(UserService.class);
+    Archer.create("com.github.attt.example").init().start(UserService.class);
 ```
 
 ### 自定义组件
 ```java
     Archer.enableMetrics();
     Archer.serialization(Serialization.FAST_JSON);
-    Archer.create("com.atpex.example")
+    Archer.create("com.github.attt.example")
           .addKeyGenerator("customKeyGenerator", new CustomKeyGenerator())
           .addValueSerializer("customValueSerializer", new CustomValueSerializer())
           .addStatsListener(new AllCacheEventListener())
@@ -204,7 +204,7 @@ interface UserService {
 #### redis
 ```xml
 <dependency>
-    <groupId>com.atpexgo</groupId>
+    <groupId>com.github.attt</groupId>
     <artifactId>archer-redis</artifactId>
     <version>${archer.version}</version>
 </dependency>
@@ -212,7 +212,7 @@ interface UserService {
 #### caffeine
 ```xml
 <dependency>
-    <groupId>com.atpexgo</groupId>
+    <groupId>com.github.attt</groupId>
     <artifactId>archer-caffeine</artifactId>
     <version>${archer.version}</version>
 </dependency>
@@ -222,7 +222,7 @@ interface UserService {
 ### 依赖
 ```xml
 <dependency>
-    <groupId>com.atpexgo</groupId>
+    <groupId>com.github.attt</groupId>
     <artifactId>archer-spring</artifactId>
     <version>${archer.version}</version>
 </dependency>
@@ -240,18 +240,18 @@ interface UserService {
 ```
 增加配置
 ```xml
-<archer:enable base-package="com.atpex.example" serialization="HESSIAN" enable-metrics="true">
+<archer:enable base-package="com.github.attt.example" serialization="HESSIAN" enable-metrics="true">
     <archer:shard-list>
-        <bean class="com.atpex.archer.cache.redis.RedisShard">
+        <bean class="com.github.attt.archer.cache.redis.RedisShard">
             <property name="database" value="6"/>
         </bean>
-        <bean class="com.atpex.archer.cache.redis.RedisShard">
+        <bean class="com.github.attt.archer.cache.redis.RedisShard">
             <property name="database" value="7"/>
         </bean>
-        <bean class="com.atpex.archer.cache.redis.RedisShard">
+        <bean class="com.github.attt.archer.cache.redis.RedisShard">
             <property name="database" value="8"/>
         </bean>
-        <bean class="com.atpex.archer.cache.redis.RedisShard">
+        <bean class="com.github.attt.archer.cache.redis.RedisShard">
             <property name="database" value="9"/>
         </bean>
     </archer:shard-list>
@@ -270,7 +270,7 @@ interface UserService {
 ### 依赖
 ```xml
 <dependency>
-    <groupId>com.atpexgo</groupId>
+    <groupId>com.github.attt</groupId>
     <artifactId>archer-spring-boot-starter</artifactId>
     <version>${archer.version}</version>
 </dependency>
@@ -283,7 +283,7 @@ interface UserService {
 @SpringBootApplication(scanBasePackages = BASE_PACKAGE)
 public class Application {
 
-    public static final String BASE_PACKAGE = "com.atpex.example";
+    public static final String BASE_PACKAGE = "com.github.attt.example";
 
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(Application.class);

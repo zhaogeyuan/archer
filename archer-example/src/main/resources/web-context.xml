@@ -16,7 +16,7 @@
 	   http://www.springframework.org/schema/util
 	   http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <context:component-scan base-package="com.atpex.archer.example.*"/>
+    <context:component-scan base-package="com.github.attt.archer.example.*"/>
 
 
     <mvc:default-servlet-handler/>
@@ -42,18 +42,18 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
-    <archer:enable base-package="com.atpex.archer.example" serialization="HESSIAN" enable-metrics="true">
+    <archer:enable base-package="com.github.attt.archer.example" serialization="HESSIAN" enable-metrics="true">
         <archer:shard-list>
-            <bean class="com.atpex.archer.cache.redis.RedisShard">
+            <bean class="com.github.attt.archer.cache.redis.RedisShard">
                 <property name="database" value="6"/>
             </bean>
-            <bean class="com.atpex.archer.cache.redis.RedisShard">
+            <bean class="com.github.attt.archer.cache.redis.RedisShard">
                 <property name="database" value="7"/>
             </bean>
-            <bean class="com.atpex.archer.cache.redis.RedisShard">
+            <bean class="com.github.attt.archer.cache.redis.RedisShard">
                 <property name="database" value="8"/>
             </bean>
-            <bean class="com.atpex.archer.cache.redis.RedisShard">
+            <bean class="com.github.attt.archer.cache.redis.RedisShard">
                 <property name="database" value="9"/>
             </bean>
         </archer:shard-list>

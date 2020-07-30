@@ -1,1 +1,1 @@
-http\://www.atpex.com/schema/archer.xsd=com/atpex/archer/spring/archer.xsd
+http\://www.atpex.com/schema/archer.xsd=../com/github/attt/archer/spring/archer.xsd
