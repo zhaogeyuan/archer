@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns="http://www.atpex.com/schema/archer"
+<xsd:schema xmlns="http://attt.github.com/schema/archer"
             xmlns:beans="http://www.springframework.org/schema/beans"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:tool="http://www.springframework.org/schema/tool"
-            targetNamespace="http://www.atpex.com/schema/archer"
+            targetNamespace="http://attt.github.com/schema/archer"
             elementFormDefault="qualified"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.springframework.org/schema/tool

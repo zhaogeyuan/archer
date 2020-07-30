@@ -3,10 +3,10 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:archer="http://www.atpex.com/schema/archer"
+       xmlns:archer="http://attt.github.com/schema/archer"
        xsi:schemaLocation="
-       http://www.atpex.com/schema/archer
-       http://www.atpex.com/schema/archer.xsd
+       http://attt.github.com/schema/archer
+       http://attt.github.com/schema/archer.xsd
        http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/context

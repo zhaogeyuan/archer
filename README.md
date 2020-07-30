@@ -231,10 +231,10 @@ interface UserService {
 引入命名空间
 ```xml
 <beans 
-       xmlns:archer="http://www.atpex.com/schema/archer"
+       xmlns:archer="http://attt.github.com/schema/archer"
        xsi:schemaLocation="
-       http://www.atpex.com/schema/archer
-       http://www.atpex.com/schema/archer.xsd"
+       http://attt.github.com/schema/archer
+       http://attt.github.com/schema/archer.xsd"
 >
 </beans>
 ```
