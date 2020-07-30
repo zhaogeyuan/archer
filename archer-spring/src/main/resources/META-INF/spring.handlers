@@ -1,1 +1,1 @@
-http\://www.atpex.com/schema/archer=com.atpex.archer.spring.config.CacheNamespaceHandler
+http\://www.atpex.com/schema/archer=com.github.attt.archer.spring.config.CacheNamespaceHandler
